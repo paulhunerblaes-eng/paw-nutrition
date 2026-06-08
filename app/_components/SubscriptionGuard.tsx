@@ -18,13 +18,7 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // 2. Admin local bypass (petnutri_admin cookie)
-      if (document.cookie.includes("petnutri_admin=1")) {
-        setChecked(true);
-        return;
-      }
-
-      // 3. Fast path — localStorage cache
+      // 2. Fast path — localStorage cache
       if (localStorage.getItem("petnutri_subscribed") === "true") {
         setChecked(true);
         return;

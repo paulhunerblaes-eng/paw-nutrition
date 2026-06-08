@@ -21,13 +21,6 @@ export function SubscriptionGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function check() {
-      // Admin bypass
-      if (document.cookie.includes("petnutri_admin=1")) {
-        setSubscribed(true);
-        setChecked(true);
-        return;
-      }
-
       const { createClient } = await import("../_lib/supabase");
       const supabase = createClient();
 
