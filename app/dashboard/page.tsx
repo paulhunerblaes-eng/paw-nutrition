@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { QuestionnaireData, NutritionPlan } from "../_lib/types";
 import { supabase } from "../_lib/supabase";
@@ -135,6 +136,7 @@ function getTips(goal: string | null, activity: string | null): Tip[] {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [pet, setPet] = useState<QuestionnaireData | null>(null);
   const [plan, setPlan] = useState<NutritionPlan | null>(null);
   const [subscribed, setSubscribed] = useState(false);
@@ -162,6 +164,15 @@ export default function DashboardPage() {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("is_subscribed")
+          .eq("id", user.id)
+          .maybeSingle();
+        if ((profile as { is_subscribed?: boolean } | null)?.is_subscribed) {
+          router.replace("/dashboard/plan");
+          return;
+        }
         const [animal, nutritionPlan] = await Promise.all([
           getAnimal(user.id),
           getPlan(user.id),

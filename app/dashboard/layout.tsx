@@ -44,9 +44,9 @@ export default function DashboardLayout({
                 {featured ? (
                   <Link
                     href={href}
-                    className="flex items-center gap-3 rounded-2xl border border-green-300 bg-green-300/15 px-3 py-3 transition-colors hover:bg-green-300/25"
+                    className="flex items-center gap-3 rounded-2xl border border-petblue bg-petblue/15 px-3 py-3 transition-colors hover:bg-petblue/25"
                   >
-                    <Icon className="h-5 w-5 flex-shrink-0 text-green-700" />
+                    <Icon className="h-5 w-5 flex-shrink-0 text-slate-700" />
                     <div>
                       <p className="text-sm font-semibold text-slate-800">{label}</p>
                       <p className="text-xs font-normal text-slate-500">Votre plan personnalisé</p>
