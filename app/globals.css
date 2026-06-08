@@ -10,7 +10,7 @@
   --color-petblue: #90D5FF;
   --animate-spin-slow: spin-slow 2.8s linear infinite;
   --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
-  --animate-scroll-left: scroll-left 55s linear infinite;
+  --animate-scroll-left: scroll-left 20s linear infinite;
 }
 
 @keyframes spin-slow {

@@ -249,10 +249,14 @@ export default function DashboardPlanPage() {
 
         {/* Supplements */}
         <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 flex items-center gap-2 font-bold text-slate-900">
+          <h2 className="mb-2 flex items-center gap-2 font-bold text-slate-900">
             <PillIcon className="h-5 w-5 text-petblue" />
             Compléments recommandés
           </h2>
+          <p className="mb-4 flex items-center gap-1.5 text-xs text-amber-600">
+            <span>⚠️</span>
+            Consultez votre vétérinaire avant d&apos;introduire tout complément alimentaire.
+          </p>
           <ul className="space-y-3">
             {plan.complements.map((c, i) => (
               <li key={i} className="rounded-xl border border-slate-100 p-3">
