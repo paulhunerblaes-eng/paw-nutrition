@@ -91,7 +91,7 @@ function ToggleButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-xl border-2 px-4 py-2.5 text-sm font-medium transition-all ${
+      className={`min-h-[44px] rounded-xl border-2 px-4 py-2.5 text-sm font-medium transition-all ${
         active
           ? "border-petblue bg-petblue/20 text-slate-900 shadow-sm"
           : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
@@ -103,7 +103,7 @@ function ToggleButton({
 }
 
 const inputClass =
-  "w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition-colors focus:border-petblue focus:ring-2 focus:ring-petblue/20";
+  "w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition-colors focus:border-petblue focus:ring-2 focus:ring-petblue/20 min-h-[44px]";
 
 export default function AnimalPage() {
   const [data, setData] = useState<QuestionnaireData>(defaultQuestionnaireData);

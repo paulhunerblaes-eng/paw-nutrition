@@ -114,7 +114,7 @@ export default function ParametresPage() {
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-2xl border border-red-100 bg-red-50 px-5 py-4">
+          <div className="flex flex-col gap-3 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="font-medium text-slate-800">Se déconnecter</p>
               <p className="mt-0.5 text-xs text-slate-500">
@@ -124,7 +124,7 @@ export default function ParametresPage() {
             <button
               type="button"
               onClick={handleLogout}
-              className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-medium text-red-600 shadow-sm ring-1 ring-red-200 transition-all hover:bg-red-50"
+              className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-medium text-red-600 shadow-sm ring-1 ring-red-200 transition-all hover:bg-red-50 sm:justify-start"
             >
               <LogOutIcon className="h-4 w-4" />
               Déconnexion
@@ -205,7 +205,7 @@ export default function ParametresPage() {
             Zone dangereuse
           </h2>
 
-          <div className="flex items-center justify-between rounded-2xl border border-red-100 bg-red-50 px-5 py-4">
+          <div className="flex flex-col gap-3 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="font-medium text-slate-800">Supprimer mon compte</p>
               <p className="mt-0.5 text-xs text-slate-500">
@@ -215,7 +215,7 @@ export default function ParametresPage() {
             <button
               type="button"
               onClick={() => setShowDeleteModal(true)}
-              className="flex-shrink-0 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-red-700"
+              className="min-h-[44px] rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-red-700"
             >
               Supprimer
             </button>

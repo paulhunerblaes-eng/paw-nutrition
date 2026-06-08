@@ -221,25 +221,25 @@ export default function DashboardPage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="mb-6 flex items-center justify-between gap-3 md:mb-8">
+        <div className="flex min-w-0 items-center gap-3">
           {photo ? (
             <img
               src={photo}
               alt={displayName}
-              className="h-12 w-12 flex-shrink-0 rounded-full object-cover ring-2 ring-petblue/30"
+              className="h-10 w-10 flex-shrink-0 rounded-full object-cover ring-2 ring-petblue/30 md:h-12 md:w-12"
             />
           ) : (
-            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-petblue/10">
-              <PetIcon className="h-6 w-6 text-petblue" />
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-petblue/10 md:h-12 md:w-12">
+              <PetIcon className="h-5 w-5 text-petblue md:h-6 md:w-6" />
             </div>
           )}
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              Bonjour — voici le plan de{" "}
+          <div className="min-w-0">
+            <h1 className="text-lg font-bold text-slate-900 md:text-2xl">
+              Bonjour —{" "}
               <span className="text-petblue">{displayName}</span>
             </h1>
-            <p className="mt-0.5 text-sm text-slate-500">
+            <p className="mt-0.5 text-xs text-slate-500 md:text-sm">
               Récapitulatif nutritionnel de votre animal.
             </p>
           </div>
@@ -297,16 +297,16 @@ export default function DashboardPage() {
                     disabled={m.index < 0}
                     className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${done ? "bg-petblue/15" : "bg-slate-50 hover:bg-slate-100"} ${m.index < 0 ? "cursor-default" : "cursor-pointer"}`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
                       <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-colors ${done ? "bg-petblue text-slate-900" : "border-2 border-slate-300 bg-white"}`}>
                         {done && <CheckIcon className="h-4 w-4" />}
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-slate-900">{m.name}</p>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-slate-900">{m.name}</p>
                         <p className="text-xs text-slate-400">{m.time}</p>
                       </div>
                     </div>
-                    <span className="text-sm font-semibold text-slate-700">{m.amount}</span>
+                    <span className="ml-2 flex-shrink-0 text-sm font-semibold text-slate-700">{m.amount}</span>
                   </button>
                 );
               })}
@@ -345,9 +345,9 @@ export default function DashboardPage() {
             )}
             <div className="mt-4 w-full space-y-2 text-left">
               {profileRows.map((item) => (
-                <div key={item.label} className="flex justify-between rounded-lg bg-slate-50 px-3 py-2 text-xs">
-                  <span className="text-slate-500">{item.label}</span>
-                  <span className="font-medium text-slate-900">{item.value}</span>
+                <div key={item.label} className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs">
+                  <span className="flex-shrink-0 text-slate-500">{item.label}</span>
+                  <span className="truncate text-right font-medium text-slate-900">{item.value}</span>
                 </div>
               ))}
             </div>

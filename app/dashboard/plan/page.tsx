@@ -171,18 +171,18 @@ export default function DashboardPlanPage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Mon plan nutritionnel</h1>
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold text-slate-900 md:text-2xl">Mon plan nutritionnel</h1>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
-            <AnimalIcon className="h-4 w-4" />
-            Plan personnalisé pour {petName}
+            <AnimalIcon className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">Plan personnalisé pour {petName}</span>
           </p>
         </div>
         <button
           type="button"
           onClick={regenerate}
-          className="flex-shrink-0 rounded-xl border border-slate-200 px-4 py-2 text-xs font-medium text-slate-500 transition-all hover:border-petblue hover:text-slate-800"
+          className="flex-shrink-0 rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-500 transition-all hover:border-petblue hover:text-slate-800 md:px-4"
         >
           Régénérer
         </button>
@@ -234,11 +234,11 @@ export default function DashboardPlanPage() {
           <div className="space-y-3">
             {plan.repas.map((m, i) => (
               <div key={i} className="rounded-xl bg-petblue/10 px-4 py-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
                     <p className="font-medium text-slate-900">{m.moment}</p>
                     <p className="text-xs text-slate-500">{m.horaire}</p>
-                    <p className="mt-1 text-sm text-slate-600">{m.description}</p>
+                    <p className="mt-1 break-words text-sm text-slate-600">{m.description}</p>
                   </div>
                   <span className="flex-shrink-0 font-semibold text-slate-800">{m.quantite}</span>
                 </div>
@@ -260,13 +260,13 @@ export default function DashboardPlanPage() {
           <ul className="space-y-3">
             {plan.complements.map((c, i) => (
               <li key={i} className="rounded-xl border border-slate-100 p-3">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-medium text-slate-900">{c.nom}</p>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <p className="min-w-0 font-medium text-slate-900">{c.nom}</p>
                   <span className="flex-shrink-0 rounded-full bg-petblue/10 px-2 py-0.5 text-xs font-medium text-petblue">
                     {c.dosage}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-slate-500">{c.benefice}</p>
+                <p className="mt-1 break-words text-xs text-slate-500">{c.benefice}</p>
               </li>
             ))}
           </ul>
@@ -328,14 +328,14 @@ export default function DashboardPlanPage() {
       </div>
 
       {/* Update link */}
-      <div className="mt-6 flex items-center justify-between rounded-2xl border border-petblue/20 bg-petblue/5 px-5 py-4">
+      <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-petblue/20 bg-petblue/5 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-slate-600">
           <span className="font-medium text-slate-800">Profil modifié ?</span>{" "}
           Mettez à jour les informations de {petName} puis régénérez le plan.
         </p>
         <Link
           href="/dashboard/animal"
-          className="ml-4 flex-shrink-0 rounded-xl bg-petblue px-4 py-2 text-sm font-semibold text-slate-900 transition-all hover:bg-petblue/80"
+          className="rounded-xl bg-petblue px-4 py-2.5 text-center text-sm font-semibold text-slate-900 transition-all hover:bg-petblue/80 sm:flex-shrink-0"
         >
           Modifier
         </Link>

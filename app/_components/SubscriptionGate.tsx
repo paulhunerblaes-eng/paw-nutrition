@@ -28,7 +28,7 @@ export function SubscriptionGate({ children }: { children: React.ReactNode }) {
       if (window.location.search.includes("success=true")) {
         setSubscribed(true);
         setChecked(true);
-        router.replace("/dashboard");
+        router.replace("/dashboard/plan");
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {

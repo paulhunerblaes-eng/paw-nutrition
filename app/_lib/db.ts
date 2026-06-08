@@ -116,6 +116,25 @@ export async function getPlan(userId: string): Promise<NutritionPlan | null> {
   return contenu as NutritionPlan;
 }
 
+export async function getAllPlans(
+  userId: string,
+): Promise<Array<{ id: string; created_at: string; contenu: NutritionPlan }>> {
+  const { data } = await supabase
+    .from("plans")
+    .select("id, created_at, contenu")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (!data) return [];
+  return (data as Array<{ id: string; created_at: string; contenu: unknown }>).map((row) => ({
+    id: row.id,
+    created_at: row.created_at,
+    contenu: (typeof row.contenu === "string"
+      ? JSON.parse(row.contenu)
+      : row.contenu) as NutritionPlan,
+  }));
+}
+
 export async function upsertPlan(
   userId: string,
   animalId: string | null,
