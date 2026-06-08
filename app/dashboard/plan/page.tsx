@@ -169,7 +169,7 @@ export default function DashboardPlanPage() {
   }
 
   return (
-    <div>
+    <div className="overflow-x-hidden">
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -234,14 +234,15 @@ export default function DashboardPlanPage() {
           <div className="space-y-3">
             {plan.repas.map((m, i) => (
               <div key={i} className="rounded-xl bg-petblue/10 px-4 py-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-slate-900">{m.moment}</p>
-                    <p className="text-xs text-slate-500">{m.horaire}</p>
-                    <p className="mt-1 text-sm leading-relaxed text-slate-600">{m.description}</p>
-                  </div>
-                  <span className="flex-shrink-0 font-semibold text-slate-800">{m.quantite}</span>
+                {/* Ligne 1 : titre + quantité */}
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-medium text-slate-900">{m.moment}</p>
+                  <span className="flex-shrink-0 text-sm font-semibold text-slate-800">{m.quantite}</span>
                 </div>
+                {/* Ligne 2 : horaire */}
+                <p className="mt-0.5 text-xs text-slate-500">{m.horaire}</p>
+                {/* Ligne 3 : description pleine largeur */}
+                <p className="mt-1 text-sm leading-relaxed text-slate-600">{m.description}</p>
               </div>
             ))}
           </div>
@@ -260,9 +261,9 @@ export default function DashboardPlanPage() {
           <ul className="space-y-3">
             {plan.complements.map((c, i) => (
               <li key={i} className="rounded-xl border border-slate-100 p-3">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <p className="min-w-0 font-medium text-slate-900">{c.nom}</p>
-                  <span className="flex-shrink-0 rounded-full bg-petblue/10 px-2 py-0.5 text-xs font-medium text-petblue">
+                <div className="flex flex-wrap items-start gap-2">
+                  <p className="font-medium text-slate-900" style={{ flex: '1 1 50%', minWidth: 0 }}>{c.nom}</p>
+                  <span className="rounded-full bg-petblue/10 px-2 py-0.5 text-xs font-medium text-petblue" style={{ maxWidth: '100%', wordBreak: 'break-word' }}>
                     {c.dosage}
                   </span>
                 </div>

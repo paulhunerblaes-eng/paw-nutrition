@@ -236,7 +236,7 @@ export default function DashboardPage() {
           )}
           <div className="min-w-0">
             <h1 className="text-lg font-bold text-slate-900 md:text-2xl">
-              Bonjour —{" "}
+              Bonjour,{" "}
               <span className="text-petblue">{displayName}</span>
             </h1>
             <p className="mt-0.5 text-xs text-slate-500 md:text-sm">
@@ -277,7 +277,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid w-full gap-6 overflow-hidden lg:grid-cols-3">
         {/* Today's meals */}
         <div className="min-w-0 lg:col-span-2">
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
@@ -295,18 +295,21 @@ export default function DashboardPage() {
                     type="button"
                     onClick={() => m.index >= 0 && toggleMeal(m.index)}
                     disabled={m.index < 0}
-                    className={`flex w-full min-w-0 items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${done ? "bg-petblue/15" : "bg-slate-50 hover:bg-slate-100"} ${m.index < 0 ? "cursor-default" : "cursor-pointer"}`}
+                    className={`w-full rounded-xl px-4 py-3 text-left transition-colors ${done ? "bg-petblue/15" : "bg-slate-50 hover:bg-slate-100"} ${m.index < 0 ? "cursor-default" : "cursor-pointer"}`}
                   >
-                    <div className="flex min-w-0 items-center gap-3">
+                    {/* Ligne 1 : checkbox + nom + quantité */}
+                    <div className="flex items-center gap-3">
                       <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-colors ${done ? "bg-petblue text-slate-900" : "border-2 border-slate-300 bg-white"}`}>
                         {done && <CheckIcon className="h-4 w-4" />}
                       </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-slate-900">{m.name}</p>
-                        <p className="text-xs text-slate-400">{m.time}</p>
+                      <div style={{ flex: '1 1 0%', minWidth: 0 }}>
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="truncate text-sm font-medium text-slate-900">{m.name}</p>
+                          <span className="flex-shrink-0 text-sm font-semibold text-slate-700">{m.amount}</span>
+                        </div>
+                        <p className="mt-0.5 text-xs text-slate-400">{m.time}</p>
                       </div>
                     </div>
-                    <span className="ml-2 flex-shrink-0 text-sm font-semibold text-slate-700">{m.amount}</span>
                   </button>
                 );
               })}
