@@ -139,6 +139,24 @@ export default function DashboardPage() {
   const [plan, setPlan] = useState<NutritionPlan | null>(null);
   const [subscribed, setSubscribed] = useState(false);
   const [photo, setPhoto] = useState<string | null>(null);
+  const [checkedMeals, setCheckedMeals] = useState<Set<number>>(new Set());
+
+  const todayKey = `petnutri_meals_${new Date().toISOString().slice(0, 10)}`;
+
+  useEffect(() => {
+    const saved = localStorage.getItem(todayKey);
+    setCheckedMeals(saved ? new Set(JSON.parse(saved) as number[]) : new Set());
+  }, [todayKey]);
+
+  const toggleMeal = (index: number) => {
+    setCheckedMeals((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      localStorage.setItem(todayKey, JSON.stringify([...next]));
+      return next;
+    });
+  };
 
   useEffect(() => {
     async function load() {
@@ -176,12 +194,12 @@ export default function DashboardPage() {
   ];
 
   const recentMeals = plan?.repas?.map((m, i) => ({
+    index: i,
     time: `${m.moment ?? "—"} · ${m.horaire ?? "—"}`,
     name: (m.description?.length ?? 0) > 60 ? m.description.slice(0, 60) + "…" : (m.description ?? "—"),
     amount: m.quantite ?? "—",
-    done: i === 0,
   })) ?? [
-    { time: "—", name: "Aucun plan généré", amount: "—", done: false },
+    { index: -1, time: "—", name: "Aucun plan généré", amount: "—" },
   ];
 
   const isDog = pet ? pet.animalType !== "cat" : true;
@@ -263,28 +281,35 @@ export default function DashboardPage() {
         {/* Today's meals */}
         <div className="lg:col-span-2">
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 flex items-center gap-2 font-bold text-slate-900">
+            <h2 className="mb-1 flex items-center gap-2 font-bold text-slate-900">
               <UtensilsIcon className="h-5 w-5 text-petblue" />
               Repas du jour
             </h2>
+            <p className="mb-4 text-xs text-slate-400">Cochez les repas donnés aujourd&apos;hui</p>
             <div className="space-y-3">
-              {recentMeals.map((m) => (
-                <div
-                  key={m.time}
-                  className={`flex items-center justify-between rounded-xl px-4 py-3 ${m.done ? "bg-petblue/15" : "bg-slate-50"}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`flex h-8 w-8 items-center justify-center rounded-full ${m.done ? "bg-petblue text-slate-900" : "border-2 border-slate-300 bg-white"}`}>
-                      {m.done && <CheckIcon className="h-4 w-4" />}
+              {recentMeals.map((m) => {
+                const done = checkedMeals.has(m.index);
+                return (
+                  <button
+                    key={m.index}
+                    type="button"
+                    onClick={() => m.index >= 0 && toggleMeal(m.index)}
+                    disabled={m.index < 0}
+                    className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${done ? "bg-petblue/15" : "bg-slate-50 hover:bg-slate-100"} ${m.index < 0 ? "cursor-default" : "cursor-pointer"}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-colors ${done ? "bg-petblue text-slate-900" : "border-2 border-slate-300 bg-white"}`}>
+                        {done && <CheckIcon className="h-4 w-4" />}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-slate-900">{m.name}</p>
+                        <p className="text-xs text-slate-400">{m.time}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">{m.name}</p>
-                      <p className="text-xs text-slate-400">{m.time}</p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-semibold text-slate-700">{m.amount}</span>
-                </div>
-              ))}
+                    <span className="text-sm font-semibold text-slate-700">{m.amount}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
