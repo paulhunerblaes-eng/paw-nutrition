@@ -6,14 +6,20 @@ import Link from "next/link";
 import { PawPrintIcon, LockOpenIcon, CheckIcon } from "../_components/Icons";
 import { supabase } from "../_lib/supabase";
 
-const AUTH_STEPS = [
+const SIGNUP_STEPS = [
   "Connexion en cours…",
   "Sauvegarde du profil…",
-  "Accès au tableau de bord…",
+  "Accès au questionnaire…",
 ];
+const LOGIN_STEPS = [
+  "Connexion en cours…",
+  "Vérification de l'abonnement…",
+  "Redirection…",
+];
+
 const AUTH_PROGRESS = [15, 60, 95];
 
-function LoadingScreen({ phase }: { phase: number }) {
+function LoadingScreen({ phase, steps }: { phase: number; steps: string[] }) {
   const progress = AUTH_PROGRESS[Math.min(phase - 1, AUTH_PROGRESS.length - 1)] ?? 5;
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-petblue/5 px-6">
@@ -31,11 +37,11 @@ function LoadingScreen({ phase }: { phase: number }) {
         </div>
 
         <h2 className="mb-7 text-center text-lg font-semibold tracking-tight text-slate-800">
-          {AUTH_STEPS[(phase - 1)] ?? "Chargement…"}
+          {steps[(phase - 1)] ?? "Chargement…"}
         </h2>
 
         <div className="mb-8 w-full space-y-3.5">
-          {AUTH_STEPS.map((label, i) => {
+          {steps.map((label, i) => {
             const state = i < phase - 1 ? "done" : i === phase - 1 ? "pending" : "hidden";
             return (
               <div
@@ -74,6 +80,7 @@ function AuthForm() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingPhase, setLoadingPhase] = useState(0);
+  const [loadingSteps, setLoadingSteps] = useState(SIGNUP_STEPS);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
 
@@ -86,6 +93,7 @@ function AuthForm() {
 
     try {
       if (tab === "signup") {
+        setLoadingSteps(SIGNUP_STEPS);
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -96,13 +104,11 @@ function AuthForm() {
         if (data.session?.user) {
           const uid = data.session.user.id;
           setLoadingPhase(2);
-          const { data: profileData, error: profileError } = await supabase
+          await supabase
             .from("profiles")
-            .upsert({ id: uid, email }, { onConflict: "id" })
-            .select();
-          console.log("[auth] profiles upsert data:", profileData, "error:", profileError);
+            .upsert({ id: uid, email }, { onConflict: "id" });
           setLoadingPhase(3);
-          router.push("/dashboard");
+          router.push("/questionnaire");
         } else {
           setLoading(false);
           setLoadingPhase(0);
@@ -111,15 +117,29 @@ function AuthForm() {
           );
         }
       } else {
+        setLoadingSteps(LOGIN_STEPS);
         const { data, error: signInError } =
           await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
 
         if (data.session?.user) {
+          const uid = data.session.user.id;
           setLoadingPhase(2);
-          await new Promise((r) => setTimeout(r, 400));
+
+          const [{ data: profile }, { data: plan }] = await Promise.all([
+            supabase.from("profiles").select("is_subscribed").eq("id", uid).maybeSingle(),
+            supabase.from("plans").select("id").eq("user_id", uid).maybeSingle(),
+          ]);
+
           setLoadingPhase(3);
-          router.push("/dashboard");
+          await new Promise((r) => setTimeout(r, 300));
+
+          const isSubscribed = (profile as { is_subscribed?: boolean } | null)?.is_subscribed;
+          if (!isSubscribed && !plan) {
+            router.push("/questionnaire");
+          } else {
+            router.push("/dashboard");
+          }
         }
       }
     } catch (err: unknown) {
@@ -166,7 +186,7 @@ function AuthForm() {
   const inputClass =
     "w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition-colors focus:border-petblue focus:ring-2 focus:ring-petblue/20";
 
-  if (loading) return <LoadingScreen phase={loadingPhase} />;
+  if (loading) return <LoadingScreen phase={loadingPhase} steps={loadingSteps} />;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-petblue/10 px-4 py-12">

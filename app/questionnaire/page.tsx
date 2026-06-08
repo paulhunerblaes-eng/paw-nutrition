@@ -137,6 +137,7 @@ export default function QuestionnairePage() {
     if (!user) { router.push("/auth"); return; }
 
     setGenerating(true);
+    localStorage.setItem("petnutri_data", JSON.stringify(data));
 
     try {
       // Save animal profile to Supabase
