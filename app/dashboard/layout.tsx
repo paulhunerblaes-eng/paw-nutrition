@@ -10,11 +10,11 @@ import {
 import { SubscriptionGate } from "../_components/SubscriptionGate";
 
 const navItems = [
-  { href: "/dashboard", Icon: HomeIcon, label: "Tableau de bord" },
-  { href: "/dashboard/plan", Icon: FoodBowlIcon, label: "Mon plan" },
-  { href: "/dashboard/animal", Icon: PawPrintIcon, label: "Mon animal" },
-  { href: "/dashboard/historique", Icon: CalendarIcon, label: "Historique" },
-  { href: "/dashboard/parametres", Icon: SettingsIcon, label: "Paramètres" },
+  { href: "/dashboard", Icon: HomeIcon, label: "Tableau de bord", featured: false },
+  { href: "/dashboard/plan", Icon: FoodBowlIcon, label: "Mon plan", featured: true },
+  { href: "/dashboard/animal", Icon: PawPrintIcon, label: "Mon animal", featured: false },
+  { href: "/dashboard/historique", Icon: CalendarIcon, label: "Historique", featured: false },
+  { href: "/dashboard/parametres", Icon: SettingsIcon, label: "Paramètres", featured: false },
 ];
 
 export default function DashboardLayout({
@@ -39,15 +39,28 @@ export default function DashboardLayout({
         {/* Nav items */}
         <nav className="p-4">
           <ul className="space-y-1">
-            {navItems.map(({ href, Icon, label }) => (
+            {navItems.map(({ href, Icon, label, featured }) => (
               <li key={href}>
-                <Link
-                  href={href}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-petblue/10 hover:text-slate-900"
-                >
-                  <Icon className="h-5 w-5" />
-                  {label}
-                </Link>
+                {featured ? (
+                  <Link
+                    href={href}
+                    className="flex items-center gap-3 rounded-xl bg-petblue px-3 py-3 shadow-sm transition-colors hover:bg-petblue/80"
+                  >
+                    <Icon className="h-5 w-5 flex-shrink-0 text-slate-800" />
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800">{label}</p>
+                      <p className="text-xs font-normal text-slate-700">Votre plan personnalisé</p>
+                    </div>
+                  </Link>
+                ) : (
+                  <Link
+                    href={href}
+                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-petblue/10 hover:text-slate-900"
+                  >
+                    <Icon className="h-5 w-5" />
+                    {label}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>

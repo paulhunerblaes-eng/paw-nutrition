@@ -311,6 +311,14 @@ export default function DashboardPage() {
                 );
               })}
             </div>
+            <div className="mt-4 flex justify-end">
+              <Link
+                href="/dashboard/plan"
+                className="text-sm font-medium text-petblue hover:underline"
+              >
+                Voir le plan nutritionnel complet →
+              </Link>
+            </div>
           </div>
         </div>
 
