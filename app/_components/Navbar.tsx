@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PawPrintIcon } from "./Icons";
 import { supabase } from "../_lib/supabase";
+import { getPostLoginRoute } from "../_lib/redirect";
 
 export default function Navbar() {
+  const router = useRouter();
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -19,6 +22,10 @@ export default function Navbar() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleDashboard = async () => {
+    router.push(await getPostLoginRoute());
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur-sm">
@@ -52,12 +59,13 @@ export default function Navbar() {
 
           {loggedIn ? (
             <>
-              <Link
-                href="/dashboard"
+              <button
+                type="button"
+                onClick={handleDashboard}
                 className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900"
               >
                 Mon dashboard
-              </Link>
+              </button>
               <a
                 href="/api/signout"
                 className="rounded-full border border-slate-200 px-5 py-2 text-sm font-semibold text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"

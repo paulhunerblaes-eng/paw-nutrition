@@ -8,6 +8,7 @@ import Navbar from "./_components/Navbar";
 import Footer from "./_components/Footer";
 import { AuthModal } from "./_components/AuthModal";
 import { supabase } from "./_lib/supabase";
+import { getPostLoginRoute } from "./_lib/redirect";
 import {
   CpuIcon,
   SparklesIcon,
@@ -103,7 +104,7 @@ export default function LandingPage() {
   const handleCTA = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
-      router.push("/dashboard");
+      router.push(await getPostLoginRoute());
     } else {
       setShowAuthModal(true);
     }
