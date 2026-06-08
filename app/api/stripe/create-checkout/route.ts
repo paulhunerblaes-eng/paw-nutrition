@@ -54,6 +54,8 @@ export async function POST(request: NextRequest) {
 
   const origin = request.headers.get("origin") ?? "http://localhost:3000";
 
+  console.log("[create-checkout] email envoyé à Stripe:", user.email);
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
