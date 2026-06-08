@@ -48,17 +48,17 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2 text-sm text-slate-500">
               <li>
-                <Link href="#" className="hover:text-slate-900">
+                <Link href="/cgu" className="hover:text-slate-900">
                   CGU
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-slate-900">
+                <Link href="/confidentialite" className="hover:text-slate-900">
                   Confidentialité
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-slate-900">
+                <Link href="/mentions-legales" className="hover:text-slate-900">
                   Mentions légales
                 </Link>
               </li>
