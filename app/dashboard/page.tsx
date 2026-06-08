@@ -340,9 +340,8 @@ export default function DashboardPage() {
               </p>
               <p className="mt-1 text-sm text-orange-700">
                 Votre animal présente des conditions médicales renseignées ({pet?.conditions}).
-                Les conseils ci-dessous sont des recommandations générales. Une fois l&apos;IA connectée,
-                vous recevrez des recommandations spécifiques adaptées à sa condition. Consultez
-                votre vétérinaire avant tout changement d&apos;alimentation.
+                Les recommandations ci-dessous sont générales. Consultez votre vétérinaire pour
+                des recommandations spécifiques adaptées à sa condition.
               </p>
             </div>
           </div>
