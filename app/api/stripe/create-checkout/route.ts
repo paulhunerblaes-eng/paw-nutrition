@@ -101,10 +101,10 @@ export async function POST(request: NextRequest) {
     const session = await stripe.checkout.sessions.create(sessionParams);
 
     console.log("[create-checkout] session créée:", session.id, "| url:", session.url?.slice(0, 60));
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url: session.url, debug_email: user.email });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[create-checkout] Stripe error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: message, debug_email: user.email }, { status: 500 });
   }
 }
