@@ -33,6 +33,8 @@ export default function AuthCallbackPage() {
         const isSubscribed = (profile as { is_subscribed?: boolean } | null)?.is_subscribed;
         if (!isSubscribed && !plan) {
           router.replace("/questionnaire");
+        } else if (isSubscribed) {
+          router.replace("/dashboard/plan");
         } else {
           router.replace("/dashboard");
         }

@@ -137,6 +137,8 @@ function AuthForm() {
           const isSubscribed = (profile as { is_subscribed?: boolean } | null)?.is_subscribed;
           if (!isSubscribed && !plan) {
             router.push("/questionnaire");
+          } else if (isSubscribed) {
+            router.push("/dashboard/plan");
           } else {
             router.push("/dashboard");
           }
