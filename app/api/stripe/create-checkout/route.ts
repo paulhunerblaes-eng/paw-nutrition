@@ -38,24 +38,39 @@ export async function POST(request: NextRequest) {
 
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
 
+  console.log("[create-checkout] user:", user?.id ?? "null", "| authError:", authError?.message ?? "none");
+  console.log("[create-checkout] email:", user?.email ?? "MANQUANT");
+
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Non authentifié — reconnectez-vous." }, { status: 401 });
+  }
+
+  if (!user.email) {
+    return NextResponse.json({ error: "Email introuvable sur ce compte — reconnectez-vous." }, { status: 400 });
   }
 
   const origin = request.headers.get("origin") ?? "http://localhost:3000";
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    payment_method_types: ["card"],
-    line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
-    metadata: { user_id: user.id },
-    customer_email: user.email,
-    success_url: `${origin}/dashboard?success=true`,
-    cancel_url: `${origin}/dashboard`,
-    locale: "fr",
-  });
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      payment_method_types: ["card"],
+      line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
+      metadata: { user_id: user.id },
+      customer_email: user.email,
+      success_url: `${origin}/dashboard?success=true`,
+      cancel_url: `${origin}/dashboard`,
+      locale: "fr",
+    });
 
-  return NextResponse.json({ url: session.url });
+    console.log("[create-checkout] session créée:", session.id, "| url:", session.url?.slice(0, 60));
+    return NextResponse.json({ url: session.url });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[create-checkout] Stripe error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
