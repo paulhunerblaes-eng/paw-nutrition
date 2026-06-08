@@ -8,6 +8,7 @@ import {
   ShieldIcon,
   LogOutIcon,
   UserIcon,
+  TriangleAlertIcon,
 } from "../../_components/Icons";
 
 export default function ParametresPage() {
@@ -17,6 +18,9 @@ export default function ParametresPage() {
   const [cancelling, setCancelling] = useState(false);
   const [cancelled, setCancelled] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -40,6 +44,27 @@ export default function ParametresPage() {
     localStorage.clear();
     sessionStorage.clear();
     router.push("/");
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const res = await fetch("/api/delete-account", { method: "POST" });
+      const json = await res.json() as { success?: boolean; error?: string };
+      if (!res.ok || !json.success) {
+        setDeleteError(json.error ?? "Une erreur est survenue. Veuillez réessayer.");
+        setDeleting(false);
+        return;
+      }
+      await supabase.auth.signOut();
+      localStorage.clear();
+      sessionStorage.clear();
+      router.push("/");
+    } catch {
+      setDeleteError("Erreur réseau. Veuillez réessayer.");
+      setDeleting(false);
+    }
   };
 
   const handleCancel = async () => {
@@ -173,7 +198,83 @@ export default function ParametresPage() {
             </div>
           )}
         </div>
+        {/* Zone dangereuse */}
+        <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-5 flex items-center gap-2 font-bold text-red-600">
+            <TriangleAlertIcon className="h-5 w-5" />
+            Zone dangereuse
+          </h2>
+
+          <div className="flex items-center justify-between rounded-2xl border border-red-100 bg-red-50 px-5 py-4">
+            <div>
+              <p className="font-medium text-slate-800">Supprimer mon compte</p>
+              <p className="mt-0.5 text-xs text-slate-500">
+                Supprime définitivement votre compte, vos données et votre abonnement.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowDeleteModal(true)}
+              className="flex-shrink-0 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-red-700"
+            >
+              Supprimer
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Confirmation modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-slate-100 bg-white p-8 shadow-2xl">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
+                <TriangleAlertIcon className="h-5 w-5 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">Supprimer mon compte</h3>
+            </div>
+
+            <p className="mb-2 text-sm text-slate-700">
+              Êtes-vous sûr ? <span className="font-semibold text-slate-900">Cette action est irréversible.</span>
+            </p>
+            <p className="mb-6 text-sm text-slate-500">
+              Toutes vos données seront supprimées : profil, plan nutritionnel, animal, et abonnement Stripe si actif.
+            </p>
+
+            {deleteError && (
+              <div className="mb-4 rounded-xl bg-red-50 px-4 py-2.5 text-xs text-red-600">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => { setShowDeleteModal(false); setDeleteError(null); }}
+                disabled={deleting}
+                className="flex-1 rounded-xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 transition-all hover:bg-slate-50 disabled:opacity-50"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={deleting}
+                className="flex-1 rounded-xl bg-red-600 py-3 text-sm font-semibold text-white transition-all hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {deleting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-red-300 border-t-white" />
+                    Suppression…
+                  </span>
+                ) : (
+                  "Supprimer définitivement"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
