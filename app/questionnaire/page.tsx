@@ -41,6 +41,11 @@ function loadStepState(index: number, phase: number): StepState {
   return phase >= 3 ? "done" : phase >= 2 ? "pending" : "hidden";
 }
 
+function isAgeValid(age: string): boolean {
+  const lower = age.trim().toLowerCase();
+  return lower.includes("ans") || lower.includes("mois");
+}
+
 function ToggleButton({
   active,
   onClick,
@@ -98,6 +103,7 @@ export default function QuestionnairePage() {
   const [data, setData] = useState<QuestionnaireData>(defaultQuestionnaireData);
   const [generating, setGenerating] = useState(false);
   const [phase, setPhase] = useState(0);
+  const [apiDone, setApiDone] = useState(false);
 
   // Redirect to /auth if not logged in
   useEffect(() => {
@@ -106,23 +112,32 @@ export default function QuestionnairePage() {
     });
   }, [router]);
 
-  // Animation phases — driven by API call duration
+  // Animation: 3 steps × 3s each = 9s minimum
   useEffect(() => {
     if (!generating) return;
-    const t1 = setTimeout(() => setPhase(1), 2000);
+    const t1 = setTimeout(() => setPhase(1), 3000);
     const t2 = setTimeout(() => setPhase(2), 6000);
-    const t3 = setTimeout(() => setPhase(3), 12000);
+    const t3 = setTimeout(() => setPhase(3), 9000);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [generating]);
+
+  // Redirect only when both animation (phase 3) and API are done
+  useEffect(() => {
+    if (phase >= 3 && apiDone) {
+      router.push("/dashboard");
+    }
+  }, [phase, apiDone, router]);
 
   const update = <K extends keyof QuestionnaireData>(
     key: K,
     value: QuestionnaireData[K]
   ) => setData((prev) => ({ ...prev, [key]: value }));
 
+  const ageInvalid = !!data.age && !isAgeValid(data.age);
+
   const canGoNext = () => {
     if (step === 1)
-      return data.animalType && data.size && data.age && data.weight && data.sex && data.activityLevel;
+      return data.animalType && data.size && data.age && isAgeValid(data.age) && data.weight && data.sex && data.activityLevel;
     if (step === 2) return data.goal;
     return data.lifestyle;
   };
@@ -140,10 +155,7 @@ export default function QuestionnairePage() {
     localStorage.setItem("petnutri_data", JSON.stringify(data));
 
     try {
-      // Save animal profile to Supabase
       await upsertAnimal(data, user.id);
-
-      // Generate nutrition plan via Claude
       const res = await fetch("/api/generate-plan?initial=true", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -156,7 +168,7 @@ export default function QuestionnairePage() {
       console.error("[questionnaire] Erreur:", e);
     }
 
-    router.push("/dashboard");
+    setApiDone(true); // triggers redirect once animation also reaches phase 3
   };
 
   const inputClass =
@@ -337,8 +349,17 @@ export default function QuestionnairePage() {
                     placeholder="Ex : 3 ans, 6 mois"
                     value={data.age}
                     onChange={(e) => update("age", e.target.value)}
-                    className={inputClass}
+                    className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition-colors focus:ring-2 ${
+                      ageInvalid
+                        ? "border-red-400 focus:border-red-400 focus:ring-red-200"
+                        : "border-slate-200 focus:border-petblue focus:ring-petblue/20"
+                    }`}
                   />
+                  {ageInvalid && (
+                    <p className="mt-1.5 text-xs text-red-500">
+                      Veuillez préciser l&apos;unité (ex : 3 ans, 6 mois)
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-700">

@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
       success_url: `${origin}/dashboard?success=true`,
       cancel_url: `${origin}/dashboard`,
       locale: "fr",
+      allow_promotion_codes: true,
     };
 
     if (customerId) {
