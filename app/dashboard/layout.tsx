@@ -10,8 +10,8 @@ import {
 import { SubscriptionGate } from "../_components/SubscriptionGate";
 
 const navItems = [
-  { href: "/dashboard", Icon: HomeIcon, label: "Tableau de bord", featured: false },
   { href: "/dashboard/plan", Icon: FoodBowlIcon, label: "Mon plan", featured: true },
+  { href: "/dashboard", Icon: HomeIcon, label: "Tableau de bord", featured: false },
   { href: "/dashboard/animal", Icon: PawPrintIcon, label: "Mon animal", featured: false },
   { href: "/dashboard/historique", Icon: CalendarIcon, label: "Historique", featured: false },
   { href: "/dashboard/parametres", Icon: SettingsIcon, label: "Paramètres", featured: false },
