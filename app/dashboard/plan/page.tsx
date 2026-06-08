@@ -226,7 +226,7 @@ export default function DashboardPlanPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Meal schedule */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+        <div className="min-w-0 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
           <h2 className="mb-4 flex items-center gap-2 font-bold text-slate-900">
             <UtensilsIcon className="h-5 w-5 text-petblue" />
             Programme des repas
@@ -238,7 +238,7 @@ export default function DashboardPlanPage() {
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-slate-900">{m.moment}</p>
                     <p className="text-xs text-slate-500">{m.horaire}</p>
-                    <p className="mt-1 break-words text-sm text-slate-600">{m.description}</p>
+                    <p className="mt-1 text-sm leading-relaxed text-slate-600">{m.description}</p>
                   </div>
                   <span className="flex-shrink-0 font-semibold text-slate-800">{m.quantite}</span>
                 </div>
@@ -266,7 +266,7 @@ export default function DashboardPlanPage() {
                     {c.dosage}
                   </span>
                 </div>
-                <p className="mt-1 break-words text-xs text-slate-500">{c.benefice}</p>
+                <p className="mt-1 text-xs text-slate-500">{c.benefice}</p>
               </li>
             ))}
           </ul>

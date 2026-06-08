@@ -219,7 +219,7 @@ export default function DashboardPage() {
   const hasConditions = !!(pet?.conditions?.trim());
 
   return (
-    <div>
+    <div className="overflow-x-hidden">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between gap-3 md:mb-8">
         <div className="flex min-w-0 items-center gap-3">
@@ -279,7 +279,7 @@ export default function DashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Today's meals */}
-        <div className="lg:col-span-2">
+        <div className="min-w-0 lg:col-span-2">
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
             <h2 className="mb-1 flex items-center gap-2 font-bold text-slate-900">
               <UtensilsIcon className="h-5 w-5 text-petblue" />
@@ -295,7 +295,7 @@ export default function DashboardPage() {
                     type="button"
                     onClick={() => m.index >= 0 && toggleMeal(m.index)}
                     disabled={m.index < 0}
-                    className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${done ? "bg-petblue/15" : "bg-slate-50 hover:bg-slate-100"} ${m.index < 0 ? "cursor-default" : "cursor-pointer"}`}
+                    className={`flex w-full min-w-0 items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${done ? "bg-petblue/15" : "bg-slate-50 hover:bg-slate-100"} ${m.index < 0 ? "cursor-default" : "cursor-pointer"}`}
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-colors ${done ? "bg-petblue text-slate-900" : "border-2 border-slate-300 bg-white"}`}>
@@ -323,7 +323,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Animal profile card */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+        <div className="min-w-0 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
           <h2 className="mb-4 flex items-center gap-2 font-bold text-slate-900">
             <PawPrintIcon className="h-5 w-5 text-petblue" />
             Mon animal
@@ -347,7 +347,7 @@ export default function DashboardPage() {
               {profileRows.map((item) => (
                 <div key={item.label} className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs">
                   <span className="flex-shrink-0 text-slate-500">{item.label}</span>
-                  <span className="truncate text-right font-medium text-slate-900">{item.value}</span>
+                  <span className="min-w-0 flex-1 overflow-hidden text-ellipsis text-right font-medium text-slate-900">{item.value}</span>
                 </div>
               ))}
             </div>
