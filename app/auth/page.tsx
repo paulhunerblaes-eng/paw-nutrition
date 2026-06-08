@@ -126,22 +126,17 @@ function AuthForm() {
           const uid = data.session.user.id;
           setLoadingPhase(2);
 
-          const [{ data: profile }, { data: plan }] = await Promise.all([
-            supabase.from("profiles").select("is_subscribed").eq("id", uid).maybeSingle(),
-            supabase.from("plans").select("id").eq("user_id", uid).maybeSingle(),
-          ]);
+          const { data: plan } = await supabase
+            .from("plans")
+            .select("id")
+            .eq("user_id", uid)
+            .limit(1)
+            .maybeSingle();
 
           setLoadingPhase(3);
           await new Promise((r) => setTimeout(r, 300));
 
-          const isSubscribed = (profile as { is_subscribed?: boolean } | null)?.is_subscribed;
-          if (!isSubscribed && !plan) {
-            router.push("/questionnaire");
-          } else if (isSubscribed) {
-            router.push("/dashboard/plan");
-          } else {
-            router.push("/dashboard");
-          }
+          router.push(plan ? "/dashboard/plan" : "/questionnaire");
         }
       }
     } catch (err: unknown) {

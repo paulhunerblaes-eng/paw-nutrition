@@ -25,19 +25,14 @@ export default function AuthCallbackPage() {
           } catch { /* ignore */ }
         }
 
-        const [{ data: profile }, { data: plan }] = await Promise.all([
-          supabase.from("profiles").select("is_subscribed").eq("id", uid).maybeSingle(),
-          supabase.from("plans").select("id").eq("user_id", uid).maybeSingle(),
-        ]);
+        const { data: plan } = await supabase
+          .from("plans")
+          .select("id")
+          .eq("user_id", uid)
+          .limit(1)
+          .maybeSingle();
 
-        const isSubscribed = (profile as { is_subscribed?: boolean } | null)?.is_subscribed;
-        if (!isSubscribed && !plan) {
-          router.replace("/questionnaire");
-        } else if (isSubscribed) {
-          router.replace("/dashboard/plan");
-        } else {
-          router.replace("/dashboard");
-        }
+        router.replace(plan ? "/dashboard/plan" : "/questionnaire");
       } else {
         router.replace("/auth");
       }
