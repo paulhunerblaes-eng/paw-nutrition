@@ -28,25 +28,16 @@ import {
 import { supabase } from "../_lib/supabase";
 import { upsertAnimal } from "../_lib/db";
 
-type StepState = "hidden" | "pending" | "done";
-const LOAD_STEPS = [
-  "Analyse des besoins nutritionnels",
-  "Calcul des portions personnalisées",
-  "Sélection des produits adaptés",
+const MESSAGES = [
+  "Analyse du profil de votre animal...",
+  "Calcul des besoins nutritionnels...",
+  "Sélection des aliments adaptés à sa race...",
+  "Personnalisation selon ses objectifs...",
+  "Vérification des apports et des portions...",
+  "Optimisation selon votre budget...",
+  "Finalisation de votre plan personnalisé...",
 ];
-const PROGRESS_PCT = [5, 38, 68, 90];
-const FINALISATION_MESSAGES = [
-  "Analyse des besoins nutritionnels...",
-  "Calcul des portions personnalisées...",
-  "Sélection des aliments adaptés...",
-  "Finalisation de votre plan...",
-  "Dernières vérifications...",
-];
-function loadStepState(index: number, phase: number): StepState {
-  if (index === 0) return phase >= 1 ? "done" : "pending";
-  if (index === 1) return phase >= 2 ? "done" : phase >= 1 ? "pending" : "hidden";
-  return phase >= 3 ? "done" : phase >= 2 ? "pending" : "hidden";
-}
+const MSG_PROGRESS = [12, 25, 38, 51, 63, 76, 90];
 
 function isAgeValid(age: string): boolean {
   const lower = age.trim().toLowerCase();
@@ -109,9 +100,8 @@ export default function QuestionnairePage() {
   const [step, setStep] = useState(1);
   const [data, setData] = useState<QuestionnaireData>(defaultQuestionnaireData);
   const [generating, setGenerating] = useState(false);
-  const [phase, setPhase] = useState(0);
+  const [msgIndex, setMsgIndex] = useState(0);
   const [apiDone, setApiDone] = useState(false);
-  const [finalisationIndex, setFinalisationIndex] = useState(0);
 
   // Redirect to /auth if not logged in
   useEffect(() => {
@@ -120,31 +110,21 @@ export default function QuestionnairePage() {
     });
   }, [router]);
 
-  // Animation: 3 steps × 2s each = 6s minimum
+  // Advance through messages once every 4s
   useEffect(() => {
     if (!generating) return;
-    const t1 = setTimeout(() => setPhase(1), 2000);
-    const t2 = setTimeout(() => setPhase(2), 4000);
-    const t3 = setTimeout(() => setPhase(3), 6000);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    const timers = MESSAGES.map((_, i) =>
+      setTimeout(() => setMsgIndex(i + 1), (i + 1) * 4000)
+    );
+    return () => timers.forEach(clearTimeout);
   }, [generating]);
 
-  // Cycle finalisation messages while waiting for API after animation completes
+  // Redirect when API responds and at least the first message has shown (4s min)
   useEffect(() => {
-    if (phase < 3 || apiDone) return;
-    const interval = setInterval(
-      () => setFinalisationIndex((i) => (i + 1) % FINALISATION_MESSAGES.length),
-      3000
-    );
-    return () => clearInterval(interval);
-  }, [phase, apiDone]);
-
-  // Redirect immediately once both animation and API are done (brief delay for progress → 100% visual)
-  useEffect(() => {
-    if (phase < 3 || !apiDone) return;
+    if (!apiDone || msgIndex < 1) return;
     const t = setTimeout(() => router.push("/dashboard/plan"), 600);
     return () => clearTimeout(t);
-  }, [phase, apiDone, router]);
+  }, [apiDone, msgIndex, router]);
 
   const update = <K extends keyof QuestionnaireData>(
     key: K,
@@ -195,9 +175,9 @@ export default function QuestionnairePage() {
     "w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition-colors focus:border-petblue focus:ring-2 focus:ring-petblue/20";
 
   if (generating) {
-    const inFinalisation = phase >= 3 && !apiDone;
-    const isFinished = phase >= 3 && apiDone;
-    const progress = isFinished ? 100 : PROGRESS_PCT[Math.min(phase, 3)];
+    const allMessagesDone = msgIndex >= MESSAGES.length;
+    const atLast = msgIndex >= MESSAGES.length - 1;
+    const progress = apiDone ? 100 : MSG_PROGRESS[Math.min(msgIndex, MESSAGES.length - 1)] ?? 90;
 
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-petblue/5 px-6">
@@ -221,52 +201,19 @@ export default function QuestionnairePage() {
           </div>
 
           <h2 className="mb-7 text-center text-lg font-semibold tracking-tight text-slate-800">
-            {inFinalisation
-              ? "Finalisation de votre plan…"
-              : "Nous analysons le profil de votre animal…"}
+            Création de votre plan nutritionnel
           </h2>
 
-          <div className="mb-8 w-full space-y-3.5">
-            {LOAD_STEPS.map((label, i) => {
-              const state = loadStepState(i, phase);
-              return (
-                <div
-                  key={label}
-                  className={`flex items-center gap-3 transition-all duration-500 ease-out ${
-                    state === "hidden" ? "translate-y-2 opacity-0" : "translate-y-0 opacity-100"
-                  }`}
-                >
-                  <div
-                    className={`h-2 w-2 flex-shrink-0 rounded-full transition-colors duration-300 ${
-                      state === "done" ? "bg-petblue" : state === "pending" ? "animate-pulse bg-petblue/50" : "bg-slate-200"
-                    }`}
-                  />
-                  <span
-                    className={`flex-1 text-sm transition-colors duration-300 ${
-                      state === "done" ? "font-medium text-slate-800" : "text-slate-400"
-                    }`}
-                  >
-                    {label}
-                  </span>
-                  <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
-                    {state === "pending" && (
-                      <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-petblue/20 border-t-petblue" />
-                    )}
-                    {state === "done" && <CheckIcon className="h-4 w-4 text-petblue" />}
-                  </div>
-                </div>
-              );
-            })}
-            {inFinalisation && (
-              <div className="flex items-center gap-3">
-                <div className="h-2 w-2 flex-shrink-0 rounded-full animate-pulse bg-petblue/50" />
-                <span key={finalisationIndex} className="flex-1 text-sm text-slate-500 transition-all duration-500">
-                  {FINALISATION_MESSAGES[finalisationIndex]}
-                </span>
-                <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
-                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-petblue/20 border-t-petblue" />
-                </div>
+          <div className="mb-8 flex min-h-[2rem] w-full items-center">
+            {!allMessagesDone ? (
+              <div key={msgIndex} className="flex w-full items-center gap-3">
+                <div className="h-3.5 w-3.5 flex-shrink-0 animate-spin rounded-full border-2 border-petblue/20 border-t-petblue" />
+                <span className="text-sm text-slate-600">{MESSAGES[msgIndex]}</span>
               </div>
+            ) : (
+              <p className="w-full text-center text-sm italic text-slate-400">
+                Cela peut prendre quelques secondes, voire 1 minute…
+              </p>
             )}
           </div>
 
@@ -277,7 +224,7 @@ export default function QuestionnairePage() {
                 style={{ width: `${progress}%` }}
               />
             </div>
-            {inFinalisation && (
+            {atLast && !apiDone && (
               <div
                 className="absolute top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-petblue animate-pulse"
                 style={{
