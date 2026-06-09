@@ -112,19 +112,19 @@ export default function QuestionnairePage() {
     });
   }, [router]);
 
-  // Animation: 3 steps × 3s each = 9s minimum
+  // Animation: 3 steps × 2s each = 6s minimum
   useEffect(() => {
     if (!generating) return;
-    const t1 = setTimeout(() => setPhase(1), 3000);
-    const t2 = setTimeout(() => setPhase(2), 6000);
-    const t3 = setTimeout(() => setPhase(3), 9000);
+    const t1 = setTimeout(() => setPhase(1), 2000);
+    const t2 = setTimeout(() => setPhase(2), 4000);
+    const t3 = setTimeout(() => setPhase(3), 6000);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [generating]);
 
   // Redirect only when both animation (phase 3) and API are done
   useEffect(() => {
     if (phase >= 3 && apiDone) {
-      router.push("/dashboard");
+      router.push("/dashboard/plan");
     }
   }, [phase, apiDone, router]);
 
@@ -154,21 +154,23 @@ export default function QuestionnairePage() {
     setGenerating(true);
     localStorage.setItem("petnutri_data", JSON.stringify(data));
 
-    try {
-      await upsertAnimal(data, user.id);
-      const res = await fetch("/api/generate-plan?initial=true", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) {
-        console.error("[questionnaire] generate-plan échoué:", res.status);
+    // Fire API call in parallel with animation — don't await here
+    (async () => {
+      try {
+        await upsertAnimal(data, user.id);
+        const res = await fetch("/api/generate-plan?initial=true", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) {
+          console.error("[questionnaire] generate-plan échoué:", res.status);
+        }
+      } catch (e) {
+        console.error("[questionnaire] Erreur:", e);
       }
-    } catch (e) {
-      console.error("[questionnaire] Erreur:", e);
-    }
-
-    setApiDone(true); // triggers redirect once animation also reaches phase 3
+      setApiDone(true); // triggers redirect once animation also reaches phase 3
+    })();
   };
 
   const inputClass =
