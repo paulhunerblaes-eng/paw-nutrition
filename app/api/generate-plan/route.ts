@@ -6,6 +6,8 @@ import type { NutritionPlan } from "../../_lib/types";
 
 const SYSTEM_PROMPT = `Tu es un expert en nutrition vétérinaire. Réponds UNIQUEMENT avec un objet JSON valide, sans markdown, sans backticks, sans texte d'introduction. Le JSON doit commencer par { et finir par }.
 
+Tu dois utiliser les données exactes de l'animal dans TOUTES tes recommandations. Ne jamais inventer des valeurs différentes. Le poids, l'âge et les caractéristiques fournis sont les seuls à utiliser.
+
 Le JSON doit respecter exactement ce schéma :
 {
   "resume": "string (2-3 phrases résumant le plan et ses objectifs)",
@@ -179,25 +181,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Réponse IA invalide — réessayez" }, { status: 500 });
   }
 
-  // Persist to plans table
-  const { data: existingPlan } = await supabase
-    .from("plans")
-    .select("id")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (existingPlan) {
-    await supabase
-      .from("plans")
-      .update({ contenu: plan, updated_at: new Date().toISOString() })
-      .eq("id", (existingPlan as { id: string }).id);
-  } else {
-    await supabase.from("plans").insert({
-      user_id: user.id,
-      animal_id: animalId,
-      contenu: plan,
-    });
-  }
+  // Always insert a new plan row to preserve history
+  await supabase.from("plans").insert({
+    user_id: user.id,
+    animal_id: animalId,
+    contenu: plan,
+  });
 
   // Increment regeneration counter (skip for initial generation)
   if (!isInitial) {

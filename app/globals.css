@@ -42,10 +42,13 @@ body {
 }
 
 /* Prevent text from ever rendering vertically on mobile */
-p, span, li, td, th {
-  word-break: normal;
-  overflow-wrap: break-word;
-  white-space: normal;
+p, span, div, li, td, th {
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  word-break: normal !important;
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+  max-width: 100% !important;
 }
 
 .blur-plan {
