@@ -75,7 +75,7 @@ export default function ConfidentialitePage() {
                 <strong>Stripe</strong> — traitement des paiements (certifié PCI-DSS).
               </li>
               <li>
-                <strong>Anthropic</strong> — génération des plans par IA (données de l&apos;animal
+                <strong>Notre prestataire IA</strong> — génération des plans nutritionnels (données de l&apos;animal
                 uniquement, sans identifiant personnel).
               </li>
             </ul>

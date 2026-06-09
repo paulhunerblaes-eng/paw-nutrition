@@ -303,8 +303,8 @@ export default function DashboardPage() {
                         {done && <CheckIcon className="h-4 w-4" />}
                       </div>
                       <div style={{ flex: '1 1 0%', minWidth: 0 }}>
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="truncate text-sm font-medium text-slate-900">{m.name}</p>
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm font-medium text-slate-900" style={{ minWidth: 0, flex: '1 1 0%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</p>
                           <span className="flex-shrink-0 text-sm font-semibold text-slate-700">{m.amount}</span>
                         </div>
                         <p className="mt-0.5 text-xs text-slate-400">{m.time}</p>

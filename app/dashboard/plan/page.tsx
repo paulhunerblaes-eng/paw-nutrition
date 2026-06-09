@@ -46,7 +46,7 @@ function GeneratingScreen() {
           Génération de votre plan{dots}
         </h2>
         <p className="text-sm text-slate-400">
-          Claude analyse le profil de votre animal et prépare des recommandations personnalisées. Cela prend environ 15 secondes.
+          Notre système analyse le profil de votre animal et prépare des recommandations personnalisées. Cela prend environ 15 secondes.
         </p>
       </div>
     </div>
