@@ -34,7 +34,14 @@ const LOAD_STEPS = [
   "Calcul des portions personnalisées",
   "Sélection des produits adaptés",
 ];
-const PROGRESS_PCT = [5, 38, 68, 100];
+const PROGRESS_PCT = [5, 38, 68, 90];
+const FINALISATION_MESSAGES = [
+  "Analyse des besoins nutritionnels...",
+  "Calcul des portions personnalisées...",
+  "Sélection des aliments adaptés...",
+  "Finalisation de votre plan...",
+  "Dernières vérifications...",
+];
 function loadStepState(index: number, phase: number): StepState {
   if (index === 0) return phase >= 1 ? "done" : "pending";
   if (index === 1) return phase >= 2 ? "done" : phase >= 1 ? "pending" : "hidden";
@@ -104,6 +111,7 @@ export default function QuestionnairePage() {
   const [generating, setGenerating] = useState(false);
   const [phase, setPhase] = useState(0);
   const [apiDone, setApiDone] = useState(false);
+  const [finalisationIndex, setFinalisationIndex] = useState(0);
 
   // Redirect to /auth if not logged in
   useEffect(() => {
@@ -121,11 +129,21 @@ export default function QuestionnairePage() {
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [generating]);
 
-  // Redirect only when both animation (phase 3) and API are done
+  // Cycle finalisation messages while waiting for API after animation completes
   useEffect(() => {
-    if (phase >= 3 && apiDone) {
-      router.push("/dashboard/plan");
-    }
+    if (phase < 3 || apiDone) return;
+    const interval = setInterval(
+      () => setFinalisationIndex((i) => (i + 1) % FINALISATION_MESSAGES.length),
+      3000
+    );
+    return () => clearInterval(interval);
+  }, [phase, apiDone]);
+
+  // Redirect immediately once both animation and API are done (brief delay for progress → 100% visual)
+  useEffect(() => {
+    if (phase < 3 || !apiDone) return;
+    const t = setTimeout(() => router.push("/dashboard/plan"), 600);
+    return () => clearTimeout(t);
   }, [phase, apiDone, router]);
 
   const update = <K extends keyof QuestionnaireData>(
@@ -177,7 +195,10 @@ export default function QuestionnairePage() {
     "w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition-colors focus:border-petblue focus:ring-2 focus:ring-petblue/20";
 
   if (generating) {
-    const progress = PROGRESS_PCT[phase];
+    const inFinalisation = phase >= 3 && !apiDone;
+    const isFinished = phase >= 3 && apiDone;
+    const progress = isFinished ? 100 : PROGRESS_PCT[Math.min(phase, 3)];
+
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-petblue/5 px-6">
         <div className="flex w-full max-w-sm flex-col items-center">
@@ -200,7 +221,9 @@ export default function QuestionnairePage() {
           </div>
 
           <h2 className="mb-7 text-center text-lg font-semibold tracking-tight text-slate-800">
-            Nous analysons le profil de votre animal…
+            {inFinalisation
+              ? "Finalisation de votre plan…"
+              : "Nous analysons le profil de votre animal…"}
           </h2>
 
           <div className="mb-8 w-full space-y-3.5">
@@ -234,13 +257,35 @@ export default function QuestionnairePage() {
                 </div>
               );
             })}
+            {inFinalisation && (
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 flex-shrink-0 rounded-full animate-pulse bg-petblue/50" />
+                <span key={finalisationIndex} className="flex-1 text-sm text-slate-500 transition-all duration-500">
+                  {FINALISATION_MESSAGES[finalisationIndex]}
+                </span>
+                <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center">
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-petblue/20 border-t-petblue" />
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="h-0.5 w-full overflow-hidden rounded-full bg-slate-200">
-            <div
-              className="h-full rounded-full bg-petblue transition-all duration-700 ease-out"
-              style={{ width: `${progress}%` }}
-            />
+          <div className="relative mb-1 w-full">
+            <div className="h-0.5 w-full overflow-hidden rounded-full bg-slate-200">
+              <div
+                className="h-full rounded-full bg-petblue transition-all duration-700 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            {inFinalisation && (
+              <div
+                className="absolute top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-petblue animate-pulse"
+                style={{
+                  left: `calc(${progress}% - 5px)`,
+                  boxShadow: "0 0 8px 3px rgba(144,213,255,0.7)",
+                }}
+              />
+            )}
           </div>
           <p className="mt-3 text-xs text-slate-400">{progress}%</p>
         </div>
