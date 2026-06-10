@@ -70,15 +70,39 @@ const LIFESTYLE_MAP: Record<string, string> = {
 };
 
 function buildPrompt(a: Record<string, unknown>): string {
+  const species = a.animalType === "dog" ? "chien" : "chat";
+  const weight = a.weight ?? "non précisé";
+  const age = a.age ?? "non précisé";
+  const breed = a.breed ?? "non précisée";
+
   const lines: string[] = [
-    `Génère un plan nutritionnel complet et personnalisé pour cet animal :`,
-    ``,
-    `PROFIL :`,
-    `- Espèce : ${a.animalType === "dog" ? "Chien" : "Chat"}`,
-    a.breed ? `- Race : ${a.breed}` : "",
+    `DONNÉES EXACTES ET OBLIGATOIRES DE L'ANIMAL - NE JAMAIS MODIFIER CES VALEURS :`,
+    `- Poids : ${weight}kg (UTILISE CE POIDS EXACT DANS TOUTES TES RECOMMANDATIONS)`,
+    `- Âge : ${age}`,
+    `- Race : ${breed}`,
+    `- Type : ${species}`,
     a.size ? `- Gabarit : ${a.size}` : "",
-    a.age ? `- Âge : ${a.age}` : "",
-    a.weight ? `- Poids actuel : ${a.weight} kg` : "",
+    a.sex ? `- Sexe : ${a.sex === "male" ? "Mâle" : "Femelle"}` : "",
+    `- Stérilisé(e) : ${a.sterilized ? "Oui" : "Non"}`,
+    a.activityLevel ? `- Niveau d'activité : ${ACTIVITY_MAP[a.activityLevel as string] ?? a.activityLevel}` : "",
+    a.goal ? `- Objectif : ${GOAL_MAP[a.goal as string] ?? a.goal}` : "",
+    a.lifestyle ? `- Mode de vie : ${LIFESTYLE_MAP[a.lifestyle as string] ?? a.lifestyle}` : "",
+    a.currentDiet ? `- Régime actuel : ${a.currentDiet}` : "- Régime actuel : non précisé",
+    a.budget ? `- Budget mensuel : ${a.budget} €` : "",
+    a.conditions ? `- Pathologies connues : ${a.conditions}` : "- Pathologies : aucune",
+    a.allergies ? `- Allergies alimentaires : ${a.allergies}` : "- Allergies : aucune",
+    a.recentEvents ? `- Événements récents : ${a.recentEvents}` : "",
+    ``,
+    `RAPPEL IMPORTANT : Le ${species} pèse exactement ${weight}kg. Toutes tes recommandations de quantités, calories et hydratation doivent être calculées pour un animal de ${weight}kg. Ne jamais utiliser un autre poids.`,
+    ``,
+    `Génère un plan nutritionnel complet et personnalisé pour ce ${species} de ${weight}kg :`,
+    ``,
+    `PROFIL (récapitulatif) :`,
+    `- Espèce : ${species === "chien" ? "Chien" : "Chat"}`,
+    `- Race : ${breed}`,
+    `- Âge : ${age}`,
+    `- Poids : ${weight} kg`,
+    a.size ? `- Gabarit : ${a.size}` : "",
     a.sex ? `- Sexe : ${a.sex === "male" ? "Mâle" : "Femelle"}` : "",
     `- Stérilisé(e) : ${a.sterilized ? "Oui" : "Non"}`,
     a.activityLevel ? `- Niveau d'activité : ${ACTIVITY_MAP[a.activityLevel as string] ?? a.activityLevel}` : "",
@@ -93,6 +117,8 @@ function buildPrompt(a: Record<string, unknown>): string {
     a.conditions ? `- Pathologies connues : ${a.conditions}` : "- Pathologies : aucune",
     a.allergies ? `- Allergies alimentaires : ${a.allergies}` : "- Allergies : aucune",
     a.recentEvents ? `- Événements récents : ${a.recentEvents}` : "",
+    ``,
+    `CONFIRMATION FINALE : Cet animal pèse ${weight}kg. Base tous tes calculs (calories journalières, quantités par repas, dosage des compléments) sur ce poids de ${weight}kg.`,
   ];
 
   return lines.filter((l) => l !== "").join("\n");
