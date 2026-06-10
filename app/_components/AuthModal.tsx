@@ -11,10 +11,13 @@ interface Props {
 
 export function AuthModal({ onSuccess, onClose }: Props) {
   const [tab, setTab] = useState<"login" | "signup">("signup");
+  const [view, setView] = useState<"auth" | "forgot" | "forgot-sent">("auth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [forgotEmail, setForgotEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState("Chargement…");
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
@@ -61,6 +64,25 @@ export function AuthModal({ onSuccess, onClose }: Props) {
     }
   };
 
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+      forgotEmail,
+      { redirectTo: "https://petnutri.fr/reset-password" },
+    );
+    setForgotLoading(false);
+    if (resetError) setError(resetError.message);
+    else setView("forgot-sent");
+  };
+
+  const openForgot = () => {
+    setForgotEmail(email);
+    setError(null);
+    setInfo(null);
+    setView("forgot");
+  };
+
   const handleGoogle = async () => {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -72,31 +94,123 @@ export function AuthModal({ onSuccess, onClose }: Props) {
   const inputClass =
     "w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition-colors focus:border-petblue focus:ring-2 focus:ring-petblue/20";
 
+  const modalHeader = (
+    <div className="flex items-center justify-between px-8 pt-7">
+      <div className="flex items-center gap-2">
+        <PawPrintIcon className="h-6 w-6 text-petblue" />
+        <span className="text-lg font-bold text-slate-900">
+          Pet<span className="text-petblue">Nutri</span>
+        </span>
+      </div>
+      <button
+        type="button"
+        onClick={onClose}
+        className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+        aria-label="Fermer"
+      >
+        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
+          <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+        </svg>
+      </button>
+    </div>
+  );
+
+  if (view === "forgot" || view === "forgot-sent") {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
+        onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      >
+        <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl">
+          {modalHeader}
+          <div className="px-8 pb-8 pt-5">
+            {view === "forgot-sent" ? (
+              <div className="text-center py-4">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-petblue/10">
+                  <svg viewBox="0 0 24 24" className="h-7 w-7 text-petblue" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <h2 className="mb-2 text-lg font-semibold text-slate-900">Email envoyé !</h2>
+                <p className="mb-6 text-sm text-slate-500">
+                  Un email de réinitialisation a été envoyé à{" "}
+                  <span className="font-medium text-slate-700">{forgotEmail}</span>.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setView("auth"); setError(null); }}
+                  className="text-sm font-medium text-petblue hover:text-petblue/80"
+                >
+                  ← Retour à la connexion
+                </button>
+              </div>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => { setView("auth"); setError(null); }}
+                  className="mb-5 flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600"
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Retour
+                </button>
+                <h2 className="mb-1 text-xl font-bold text-slate-900">Mot de passe oublié ?</h2>
+                <p className="mb-6 text-sm text-slate-500">
+                  Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.
+                </p>
+
+                {error && (
+                  <div className="mb-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    {error}
+                  </div>
+                )}
+
+                <form onSubmit={handleForgotSubmit} className="space-y-4">
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                      Adresse email
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="vous@exemple.com"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      required
+                      className={inputClass}
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={forgotLoading}
+                    className="w-full rounded-xl bg-petblue py-3.5 font-semibold text-slate-900 transition-all hover:bg-petblue/80 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {forgotLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-400 border-t-slate-800" />
+                        Envoi en cours…
+                      </span>
+                    ) : (
+                      "Envoyer le lien de réinitialisation"
+                    )}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between px-8 pt-7">
-          <div className="flex items-center gap-2">
-            <PawPrintIcon className="h-6 w-6 text-petblue" />
-            <span className="text-lg font-bold text-slate-900">
-              Pet<span className="text-petblue">Nutri</span>
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-            aria-label="Fermer"
-          >
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
-              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
+        {modalHeader}
 
         <div className="px-8 pb-8 pt-5">
           {/* Tab switcher */}
@@ -179,6 +293,17 @@ export function AuthModal({ onSuccess, onClose }: Props) {
                 required
                 className={inputClass}
               />
+              {tab === "login" && (
+                <div className="mt-1.5 text-right">
+                  <button
+                    type="button"
+                    onClick={openForgot}
+                    className="text-xs text-slate-400 hover:text-slate-600"
+                  >
+                    Mot de passe oublié ?
+                  </button>
+                </div>
+              )}
             </div>
             <button
               type="submit"

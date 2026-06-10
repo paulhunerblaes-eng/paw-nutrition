@@ -75,10 +75,13 @@ function LoadingScreen({ phase, steps }: { phase: number; steps: string[] }) {
 function AuthForm() {
   const router = useRouter();
   const [tab, setTab] = useState<"login" | "signup">("signup");
+  const [view, setView] = useState<"auth" | "forgot" | "forgot-sent">("auth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [forgotEmail, setForgotEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
   const [loadingPhase, setLoadingPhase] = useState(0);
   const [loadingSteps, setLoadingSteps] = useState(SIGNUP_STEPS);
   const [error, setError] = useState<string | null>(null);
@@ -165,25 +168,123 @@ function AuthForm() {
     if (oauthError) setError(oauthError.message);
   };
 
-  const handleResetPassword = async () => {
-    if (!email) {
-      setError("Entrez votre email pour réinitialiser le mot de passe.");
-      return;
-    }
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotLoading(true);
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-      email,
+      forgotEmail,
+      { redirectTo: "https://petnutri.fr/reset-password" },
     );
+    setForgotLoading(false);
     if (resetError) setError(resetError.message);
-    else
-      setInfo(
-        "Email de réinitialisation envoyé. Vérifiez votre boîte mail.",
-      );
+    else setView("forgot-sent");
+  };
+
+  const openForgot = () => {
+    setForgotEmail(email);
+    setError(null);
+    setInfo(null);
+    setView("forgot");
   };
 
   const inputClass =
     "w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition-colors focus:border-petblue focus:ring-2 focus:ring-petblue/20";
 
   if (loading) return <LoadingScreen phase={loadingPhase} steps={loadingSteps} />;
+
+  if (view === "forgot" || view === "forgot-sent") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-petblue/10 px-4 py-12">
+        <div className="w-full max-w-md">
+          <div className="mb-8 text-center">
+            <Link href="/" className="inline-flex items-center gap-2">
+              <PawPrintIcon className="h-7 w-7 text-petblue" />
+              <span className="text-2xl font-bold text-slate-900">
+                Pet<span className="text-petblue">Nutri</span>
+              </span>
+            </Link>
+          </div>
+
+          <div className="rounded-3xl border border-slate-100 bg-white p-8 shadow-xl shadow-slate-100">
+            {view === "forgot-sent" ? (
+              <div className="text-center">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-petblue/10">
+                  <svg viewBox="0 0 24 24" className="h-7 w-7 text-petblue" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <h2 className="mb-2 text-lg font-semibold text-slate-900">Email envoyé !</h2>
+                <p className="mb-6 text-sm text-slate-500">
+                  Un email de réinitialisation a été envoyé à{" "}
+                  <span className="font-medium text-slate-700">{forgotEmail}</span>.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setView("auth"); setError(null); }}
+                  className="text-sm font-medium text-petblue hover:text-petblue/80"
+                >
+                  ← Retour à la connexion
+                </button>
+              </div>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => { setView("auth"); setError(null); }}
+                  className="mb-5 flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600"
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Retour
+                </button>
+                <h2 className="mb-1 text-xl font-bold text-slate-900">Mot de passe oublié ?</h2>
+                <p className="mb-6 text-sm text-slate-500">
+                  Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.
+                </p>
+
+                {error && (
+                  <div className="mb-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    {error}
+                  </div>
+                )}
+
+                <form onSubmit={handleForgotSubmit} className="space-y-4">
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                      Adresse email
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="vous@exemple.com"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      required
+                      className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition-colors focus:border-petblue focus:ring-2 focus:ring-petblue/20"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={forgotLoading}
+                    className="w-full rounded-xl bg-petblue py-3.5 font-semibold text-slate-900 transition-all hover:bg-petblue/80 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {forgotLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-400 border-t-slate-800" />
+                        Envoi en cours…
+                      </span>
+                    ) : (
+                      "Envoyer le lien de réinitialisation"
+                    )}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-petblue/10 px-4 py-12">
@@ -300,7 +401,7 @@ function AuthForm() {
               <div className="text-right">
                 <button
                   type="button"
-                  onClick={handleResetPassword}
+                  onClick={openForgot}
                   className="text-xs text-slate-400 hover:text-slate-600"
                 >
                   Mot de passe oublié ?
