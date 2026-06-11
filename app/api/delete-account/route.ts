@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
+import { sendEmail, accountDeletionEmail } from "@/app/_lib/email";
 
 export async function POST() {
   const cookieStore = await cookies();
@@ -54,6 +55,8 @@ export async function POST() {
     } catch { /* non-blocking — proceed with deletion regardless */ }
   }
 
+  const userEmail = user.email;
+
   // Delete user data from all tables
   await Promise.all([
     supabaseAdmin.from("animals").delete().eq("user_id", user.id),
@@ -63,6 +66,14 @@ export async function POST() {
 
   // Delete auth user (must be last)
   await supabaseAdmin.auth.admin.deleteUser(user.id);
+
+  if (userEmail) {
+    await sendEmail({
+      to: userEmail,
+      subject: "Confirmation de suppression de votre compte PetNutri",
+      html: accountDeletionEmail(),
+    }).catch(() => { /* non-blocking */ });
+  }
 
   return NextResponse.json({ success: true });
 }

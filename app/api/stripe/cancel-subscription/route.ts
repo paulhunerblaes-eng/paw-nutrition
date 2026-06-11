@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { sendEmail, cancellationEmail } from "@/app/_lib/email";
 
 export async function POST(request: NextRequest) {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -54,9 +55,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Aucun abonnement actif trouvé" }, { status: 404 });
   }
 
-  await stripe.subscriptions.update(subscriptions.data[0].id, {
+  const subscription = subscriptions.data[0];
+
+  const updated = await stripe.subscriptions.update(subscription.id, {
     cancel_at_period_end: true,
   });
+
+  const cancelAt = (updated as unknown as { cancel_at: number | null }).cancel_at;
+  const endDate = cancelAt
+    ? new Date(cancelAt * 1000).toLocaleDateString("fr-FR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : "";
+
+  if (user.email) {
+    await sendEmail({
+      to: user.email,
+      subject: "Confirmation de résiliation de votre abonnement PetNutri",
+      html: cancellationEmail(endDate),
+    }).catch(() => { /* non-blocking */ });
+  }
 
   return NextResponse.json({ success: true });
 }
