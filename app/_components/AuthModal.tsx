@@ -71,8 +71,9 @@ export function AuthModal({ onSuccess, onClose }: Props) {
       forgotEmail,
       { redirectTo: "https://petnutri.fr/reset-password" },
     );
+    console.log("[reset-password] error:", resetError);
     setForgotLoading(false);
-    if (resetError) setError(resetError.message);
+    if (resetError) setError(`Erreur: ${resetError.message} (status: ${resetError.status})`);
     else setView("forgot-sent");
   };
 
