@@ -298,14 +298,14 @@ export default function DashboardPage() {
                     className={`w-full rounded-xl px-4 py-3 text-left transition-colors ${done ? "bg-petblue/15" : "bg-slate-50 hover:bg-slate-100"} ${m.index < 0 ? "cursor-default" : "cursor-pointer"}`}
                   >
                     {/* Ligne 1 : checkbox + nom + quantité */}
-                    <div className="flex items-center gap-3">
-                      <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-colors ${done ? "bg-petblue text-slate-900" : "border-2 border-slate-300 bg-white"}`}>
+                    <div className="flex items-start gap-3">
+                      <div className={`mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-colors ${done ? "bg-petblue text-slate-900" : "border-2 border-slate-300 bg-white"}`}>
                         {done && <CheckIcon className="h-4 w-4" />}
                       </div>
                       <div style={{ flex: '1 1 0%', minWidth: 0 }}>
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-sm font-medium text-slate-900" style={{ minWidth: 0, flex: '1 1 0%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</p>
-                          <span className="flex-shrink-0 text-sm font-semibold text-slate-700">{m.amount}</span>
+                          <span className="flex-shrink-0 text-sm font-semibold text-slate-700" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '45%' }}>{m.amount}</span>
                         </div>
                         <p className="mt-0.5 text-xs text-slate-400">{m.time}</p>
                       </div>
