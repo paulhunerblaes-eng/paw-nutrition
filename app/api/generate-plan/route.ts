@@ -267,6 +267,8 @@ export async function POST(request: NextRequest) {
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+  console.log("PROMPT ENVOYÉ À L'IA:", JSON.stringify(buildPrompt(animalData)).slice(0, 500));
+
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 4096,
@@ -275,6 +277,7 @@ export async function POST(request: NextRequest) {
   });
 
   const rawText = message.content[0].type === "text" ? message.content[0].text : "{}";
+  console.log("RÉPONSE BRUTE DE L'IA:", rawText.slice(0, 500));
   console.log("[generate-plan] Réponse brute Claude:", rawText);
 
   let plan: NutritionPlan;
