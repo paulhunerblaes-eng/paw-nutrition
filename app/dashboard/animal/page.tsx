@@ -122,6 +122,7 @@ export default function AnimalPage() {
   const [photo, setPhoto] = useState<string | null>(null);
   const [limitModal, setLimitModal] = useState<{ resetDate: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const originalData = useRef<QuestionnaireData>(defaultQuestionnaireData);
 
   useEffect(() => {
     async function load() {
@@ -130,6 +131,7 @@ export default function AnimalPage() {
         const animal = await getAnimal(user.id);
         if (animal) {
           setData(animal);
+          originalData.current = animal;
           setLoaded(true);
           setPhoto(localStorage.getItem("petnutri_photo"));
           return;
@@ -140,7 +142,11 @@ export default function AnimalPage() {
         localStorage.getItem("petnutri_data") ??
         sessionStorage.getItem("petnutri_data");
       if (raw) {
-        try { setData(JSON.parse(raw) as QuestionnaireData); } catch { /* ignore */ }
+        try {
+          const parsed = JSON.parse(raw) as QuestionnaireData;
+          setData(parsed);
+          originalData.current = parsed;
+        } catch { /* ignore */ }
       }
       setPhoto(localStorage.getItem("petnutri_photo"));
       setLoaded(true);
@@ -180,7 +186,39 @@ export default function AnimalPage() {
     console.log("handleSave appelé");
     if (weightInvalid) return;
 
-    // Check regeneration limit before doing anything
+    const orig = originalData.current;
+    const onlyNameChanged =
+      data.animalType === orig.animalType &&
+      data.breed === orig.breed &&
+      data.size === orig.size &&
+      data.age === orig.age &&
+      data.weight === orig.weight &&
+      data.sex === orig.sex &&
+      data.sterilized === orig.sterilized &&
+      data.activityLevel === orig.activityLevel &&
+      data.goal === orig.goal &&
+      data.currentDiet === orig.currentDiet &&
+      data.budget === orig.budget &&
+      data.lifestyle === orig.lifestyle &&
+      data.conditions === orig.conditions &&
+      data.allergies === orig.allergies &&
+      data.recentEvents === orig.recentEvents;
+
+    if (onlyNameChanged) {
+      // Just save profile, no quota check, no regeneration
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) await upsertAnimal(data, user.id);
+      const json = JSON.stringify(data);
+      localStorage.setItem("petnutri_data", json);
+      sessionStorage.setItem("petnutri_data", json);
+      originalData.current = data;
+      setSaved(true);
+      setPlanRegenerated(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    // Check regeneration limit before regenerating
     try {
       const checkRes = await fetch("/api/check-regenerations");
       if (checkRes.ok) {
@@ -212,6 +250,7 @@ export default function AnimalPage() {
     const json = JSON.stringify(data);
     localStorage.setItem("petnutri_data", json);
     sessionStorage.setItem("petnutri_data", json);
+    originalData.current = data;
     setSaving(false);
     setSavingPhase(0);
     setSaved(true);
