@@ -169,6 +169,7 @@ export default function AnimalPage() {
   const weightInvalid = !data.weight || data.weight === "" || data.weight === "0" || isNaN(parseFloat(data.weight)) || parseFloat(data.weight) <= 0;
 
   const handleSave = async () => {
+    console.log("handleSave appelé");
     if (weightInvalid) return;
     setSaving(true);
     setSavingPhase(1);
@@ -178,6 +179,7 @@ export default function AnimalPage() {
       await upsertAnimal(data, user.id);
       setSavingPhase(2);
       try {
+        console.log("Appel generate-plan avec:", JSON.stringify(data).slice(0, 200));
         const res = await fetch("/api/generate-plan", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
