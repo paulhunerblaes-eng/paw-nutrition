@@ -131,6 +131,46 @@ function buildPrompt(a: Record<string, unknown>): string {
   return lines.filter((l) => l !== "").join("\n");
 }
 
+function sanitizePlan(plan: NutritionPlan, animalData: Record<string, unknown>): NutritionPlan {
+  const realWeight = String(animalData.weight ?? "").replace(",", ".");
+  const realType = animalData.animalType === "dog" ? "chien" : "chat";
+  const wrongType = realType === "chien" ? "chat" : "chien";
+  const realAdj = realType === "chien" ? "canin" : "félin";
+  const wrongAdj = realType === "chien" ? "félin" : "canin";
+
+  const fixText = (text: string): string => {
+    // Replace any "X kg" where X differs from the real weight
+    let s = text.replace(/\b(\d+(?:[.,]\d+)?)\s*kg\b/gi, (_match, num) => {
+      if (parseFloat(num.replace(",", ".")) !== parseFloat(realWeight)) {
+        return `${realWeight} kg`;
+      }
+      return _match;
+    });
+
+    // Replace wrong animal type (singular and plural, any case)
+    s = s.replace(new RegExp(`\\b${wrongType}(s?)\\b`, "gi"), (_m, plural) =>
+      plural ? `${realType}s` : realType,
+    );
+
+    // Replace wrong adjective (canin/félin and their feminine/plural forms)
+    s = s.replace(new RegExp(`\\b${wrongAdj}(ne?s?|s?)\\b`, "gi"), (_m, suffix) =>
+      `${realAdj}${suffix}`,
+    );
+
+    return s;
+  };
+
+  return {
+    ...plan,
+    resume: fixText(plan.resume),
+    repas: plan.repas.map((r) => ({ ...r, description: fixText(r.description), quantite: fixText(r.quantite) })),
+    aliments_recommandes: plan.aliments_recommandes.map((a) => ({ ...a, aliment: fixText(a.aliment), raison: fixText(a.raison) })),
+    aliments_eviter: plan.aliments_eviter.map((a) => ({ ...a, aliment: fixText(a.aliment), raison: fixText(a.raison) })),
+    complements: plan.complements.map((c) => ({ ...c, nom: fixText(c.nom), dosage: fixText(c.dosage), benefice: fixText(c.benefice) })),
+    conseils: plan.conseils.map(fixText),
+    avertissements: plan.avertissements.map(fixText),
+  };
+}
 
 export async function POST(request: NextRequest) {
   if (!process.env.ANTHROPIC_API_KEY) {
@@ -229,8 +269,8 @@ export async function POST(request: NextRequest) {
       .replace(/```json/g, "")
       .replace(/```/g, "")
       .trim();
-    plan = JSON.parse(cleaned) as NutritionPlan;
-    console.log("[generate-plan] Plan généré:", JSON.stringify(plan).slice(0, 300));
+    plan = sanitizePlan(JSON.parse(cleaned) as NutritionPlan, animalData);
+    console.log("[generate-plan] Plan après sanitize:", JSON.stringify(plan).slice(0, 300));
   } catch (err) {
     console.error("[generate-plan] JSON parse error:", err, "\nRaw:", rawText);
     return NextResponse.json({ error: "Réponse IA invalide — réessayez" }, { status: 500 });
