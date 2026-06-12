@@ -48,7 +48,11 @@ Le JSON doit respecter exactement ce schéma :
   ],
   "conseils": ["string", "string", "string", "string", "string"],
   "avertissements": []
-}`;
+}
+
+RÈGLES POUR LES CONSEILS :
+- Le conseil sur l'hydratation doit commencer EXACTEMENT par "Vérifiez et remplissez le bol d'eau matin et soir" — sans mentionner de poids, de quantité en ml, ni d'espèce dans cette première phrase.
+- Ne jamais écrire "Un chien/chat de X kg nécessite Y ml" dans les conseils.`;
 
 const ACTIVITY_MAP: Record<string, string> = {
   low: "faible (sédentaire)",
@@ -156,6 +160,16 @@ function sanitizePlan(plan: NutritionPlan, animalData: Record<string, unknown>):
     s = s.replace(new RegExp(`\\b${wrongAdj}(ne?s?|s?)\\b`, "gi"), (_m, suffix) =>
       `${realAdj}${suffix}`,
     );
+
+    // Remove sentences containing both "kg" and "ml" and "nécessite" — hallucinated hydration formula
+    s = s
+      .split(/(?<=[.!?])\s+/)
+      .filter((sentence) => {
+        const l = sentence.toLowerCase();
+        return !(l.includes("kg") && l.includes("ml") && l.includes("nécessite"));
+      })
+      .join(" ")
+      .trim();
 
     return s;
   };
