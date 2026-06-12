@@ -56,6 +56,7 @@ function GeneratingScreen() {
 export default function DashboardPlanPage() {
   const [pet, setPet] = useState<QuestionnaireData | null>(null);
   const [plan, setPlan] = useState<NutritionPlan | null>(null);
+  const [planVersion, setPlanVersion] = useState(0);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,8 +117,20 @@ export default function DashboardPlanPage() {
         body: JSON.stringify(pet),
       });
       const json = await res.json() as { plan?: NutritionPlan; error?: string };
-      if (json.plan) setPlan(json.plan);
-      else setError(json.error ?? "Erreur lors de la génération.");
+      if (json.plan) {
+        // Force reload from DB to guarantee we display the freshly saved plan
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const freshPlan = await getPlan(user.id);
+          setPlan(freshPlan);
+          setPlanVersion(Date.now());
+        } else {
+          setPlan(json.plan);
+          setPlanVersion(Date.now());
+        }
+      } else {
+        setError(json.error ?? "Erreur lors de la génération.");
+      }
     } catch {
       setError("Erreur réseau.");
     } finally {
@@ -169,7 +182,7 @@ export default function DashboardPlanPage() {
   }
 
   return (
-    <div className="overflow-x-hidden">
+    <div key={planVersion} className="overflow-x-hidden">
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-3">
         <div className="min-w-0">
