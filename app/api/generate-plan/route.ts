@@ -71,7 +71,7 @@ const LIFESTYLE_MAP: Record<string, string> = {
 
 function buildPrompt(a: Record<string, unknown>): string {
   const species = a.animalType === "dog" ? "chien" : "chat";
-  const weight = a.weight ?? "non précisé";
+  const weight = (a.weight && a.weight !== "" && a.weight !== "0") ? a.weight : null;
   const age = a.age ?? "non précisé";
   const breed = a.breed ?? "non précisée";
 
@@ -195,6 +195,11 @@ export async function POST(request: NextRequest) {
 
   const animalData = await request.json() as Record<string, unknown>;
   console.log("[generate-plan] appelé avec:", JSON.stringify(animalData).slice(0, 200));
+
+  const rawWeight = animalData.weight;
+  if (!rawWeight || rawWeight === "" || rawWeight === "0" || rawWeight === 0) {
+    return NextResponse.json({ error: "Poids de l'animal manquant - impossible de générer le plan" }, { status: 400 });
+  }
 
   // Get animal DB id for the foreign key
   const { data: animalRow } = await supabase

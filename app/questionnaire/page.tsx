@@ -132,10 +132,12 @@ export default function QuestionnairePage() {
   ) => setData((prev) => ({ ...prev, [key]: value }));
 
   const ageInvalid = !!data.age && !isAgeValid(data.age);
+  const weightInvalid = !!data.weight && (isNaN(parseFloat(data.weight)) || parseFloat(data.weight) <= 0);
+  const weightMissing = !data.weight || data.weight === "" || data.weight === "0";
 
   const canGoNext = () => {
     if (step === 1)
-      return data.animalType && data.size && data.age && isAgeValid(data.age) && data.weight && data.sex && data.activityLevel;
+      return data.animalType && data.size && data.age && isAgeValid(data.age) && !weightMissing && !weightInvalid && data.sex && data.activityLevel;
     if (step === 2) return data.goal;
     return data.lifestyle;
   };
@@ -362,12 +364,19 @@ export default function QuestionnairePage() {
                   <input
                     type="number"
                     placeholder="Ex : 12"
-                    min={0}
+                    min={0.1}
                     step={0.1}
                     value={data.weight}
                     onChange={(e) => update("weight", e.target.value)}
-                    className={inputClass}
+                    className={
+                      weightInvalid
+                        ? "w-full rounded-xl border border-red-400 px-4 py-3 text-sm outline-none transition-colors focus:border-red-400 focus:ring-2 focus:ring-red-200"
+                        : inputClass
+                    }
                   />
+                  {weightInvalid && (
+                    <p className="mt-1 text-xs text-red-500">Le poids doit être supérieur à 0</p>
+                  )}
                 </div>
               </div>
 
