@@ -76,6 +76,11 @@ function buildPrompt(a: Record<string, unknown>): string {
   const breed = a.breed ?? "non précisée";
 
   const lines: string[] = [
+    `ATTENTION - DONNÉES OBLIGATOIRES À UTILISER SANS EXCEPTION :`,
+    `- Type d'animal : ${species} (UNIQUEMENT des conseils pour ${species}, jamais pour un autre animal)`,
+    `- Poids EXACT : ${weight}kg (N'UTILISE JAMAIS un autre poids, notamment pas 30kg)`,
+    `- Tous tes conseils, quantités d'eau, portions doivent être calculés pour un ${species} de ${weight}kg exactement`,
+    ``,
     `DONNÉES EXACTES ET OBLIGATOIRES DE L'ANIMAL - NE JAMAIS MODIFIER CES VALEURS :`,
     `- Poids : ${weight}kg (UTILISE CE POIDS EXACT DANS TOUTES TES RECOMMANDATIONS)`,
     `- Âge : ${age}`,
@@ -119,6 +124,8 @@ function buildPrompt(a: Record<string, unknown>): string {
     a.recentEvents ? `- Événements récents : ${a.recentEvents}` : "",
     ``,
     `CONFIRMATION FINALE : Cet animal pèse ${weight}kg. Base tous tes calculs (calories journalières, quantités par repas, dosage des compléments) sur ce poids de ${weight}kg.`,
+    ``,
+    `RAPPEL FINAL : Tu génères un plan pour un ${species} de ${weight}kg. Vérifie que chaque conseil mentionne le bon poids et le bon type d'animal.`,
   ];
 
   return lines.filter((l) => l !== "").join("\n");
