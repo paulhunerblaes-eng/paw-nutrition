@@ -54,85 +54,43 @@ RÈGLES POUR LES CONSEILS :
 - Le conseil sur l'hydratation doit commencer EXACTEMENT par "Vérifiez et remplissez le bol d'eau matin et soir" — sans mentionner de poids, de quantité en ml, ni d'espèce dans cette première phrase.
 - Ne jamais écrire "Un chien/chat de X kg nécessite Y ml" dans les conseils.`;
 
-const ACTIVITY_MAP: Record<string, string> = {
-  low: "faible (sédentaire)",
-  moderate: "modéré",
-  high: "élevé (actif)",
-  very_high: "très élevé (sport/travail)",
-};
-
-const GOAL_MAP: Record<string, string> = {
-  maintain: "maintien du poids idéal",
-  lose: "perte de poids",
-  gain: "prise de poids / développement musculaire",
-};
-
-const LIFESTYLE_MAP: Record<string, string> = {
-  indoor: "vie intérieure",
-  outdoor: "vie extérieure",
-  mixed: "mixte intérieur/extérieur",
-};
-
 function buildPrompt(a: Record<string, unknown>): string {
   const species = a.animalType === "dog" ? "chien" : "chat";
-  const weight = (a.weight && a.weight !== "" && a.weight !== "0") ? a.weight : null;
-  const age = a.age ?? "non précisé";
-  const breed = a.breed ?? "non précisée";
+  const sex = a.sex === "male" ? "mâle" : "femelle";
+  const sterilized = a.sterilized ? "stérilisé(e)" : "non stérilisé(e)";
+  const activity = ({ low: "faible", moderate: "modérée", high: "élevée", very_high: "très élevée" } as Record<string, string>)[a.activityLevel as string] ?? String(a.activityLevel ?? "non précisé");
+  const goal = ({ maintain: "maintenir le poids", lose: "perdre du poids", gain: "prendre du poids" } as Record<string, string>)[a.goal as string] ?? String(a.goal ?? "non précisé");
+  const lifestyle = ({ indoor: "intérieur", outdoor: "extérieur", mixed: "mixte" } as Record<string, string>)[a.lifestyle as string] ?? String(a.lifestyle ?? "non précisé");
 
-  const lines: string[] = [
-    `ATTENTION - DONNÉES OBLIGATOIRES À UTILISER SANS EXCEPTION :`,
-    `- Type d'animal : ${species} (UNIQUEMENT des conseils pour ${species}, jamais pour un autre animal)`,
-    `- Poids EXACT : ${weight}kg (N'UTILISE JAMAIS un autre poids, notamment pas 30kg)`,
-    `- Tous tes conseils, quantités d'eau, portions doivent être calculés pour un ${species} de ${weight}kg exactement`,
-    ``,
-    `DONNÉES EXACTES ET OBLIGATOIRES DE L'ANIMAL - NE JAMAIS MODIFIER CES VALEURS :`,
-    `- Poids : ${weight}kg (UTILISE CE POIDS EXACT DANS TOUTES TES RECOMMANDATIONS)`,
-    `- Âge : ${age}`,
-    `- Race : ${breed}`,
-    `- Type : ${species}`,
-    a.size ? `- Gabarit : ${a.size}` : "",
-    a.sex ? `- Sexe : ${a.sex === "male" ? "Mâle" : "Femelle"}` : "",
-    `- Stérilisé(e) : ${a.sterilized ? "Oui" : "Non"}`,
-    a.activityLevel ? `- Niveau d'activité : ${ACTIVITY_MAP[a.activityLevel as string] ?? a.activityLevel}` : "",
-    a.goal ? `- Objectif : ${GOAL_MAP[a.goal as string] ?? a.goal}` : "",
-    a.lifestyle ? `- Mode de vie : ${LIFESTYLE_MAP[a.lifestyle as string] ?? a.lifestyle}` : "",
-    a.currentDiet ? `- Régime actuel : ${a.currentDiet}` : "- Régime actuel : non précisé",
-    a.budget ? `- Budget mensuel : ${a.budget} €` : "",
-    a.conditions ? `- Pathologies connues : ${a.conditions}` : "- Pathologies : aucune",
-    a.allergies ? `- Allergies alimentaires : ${a.allergies}` : "- Allergies : aucune",
-    a.recentEvents ? `- Événements récents : ${a.recentEvents}` : "",
-    ``,
-    `RAPPEL IMPORTANT : Le ${species} pèse exactement ${weight}kg. Toutes tes recommandations de quantités, calories et hydratation doivent être calculées pour un animal de ${weight}kg. Ne jamais utiliser un autre poids.`,
-    ``,
-    `Génère un plan nutritionnel complet et personnalisé pour ce ${species} de ${weight}kg :`,
-    ``,
-    `PROFIL (récapitulatif) :`,
-    `- Espèce : ${species === "chien" ? "Chien" : "Chat"}`,
-    `- Race : ${breed}`,
-    `- Âge : ${age}`,
-    `- Poids : ${weight} kg`,
-    a.size ? `- Gabarit : ${a.size}` : "",
-    a.sex ? `- Sexe : ${a.sex === "male" ? "Mâle" : "Femelle"}` : "",
-    `- Stérilisé(e) : ${a.sterilized ? "Oui" : "Non"}`,
-    a.activityLevel ? `- Niveau d'activité : ${ACTIVITY_MAP[a.activityLevel as string] ?? a.activityLevel}` : "",
-    a.goal ? `- Objectif : ${GOAL_MAP[a.goal as string] ?? a.goal}` : "",
-    a.lifestyle ? `- Mode de vie : ${LIFESTYLE_MAP[a.lifestyle as string] ?? a.lifestyle}` : "",
-    ``,
-    `ALIMENTATION :`,
-    a.currentDiet ? `- Régime actuel : ${a.currentDiet}` : "- Régime actuel : non précisé",
-    a.budget ? `- Budget mensuel : ${a.budget} €` : "",
-    ``,
-    `SANTÉ :`,
-    a.conditions ? `- Pathologies connues : ${a.conditions}` : "- Pathologies : aucune",
-    a.allergies ? `- Allergies alimentaires : ${a.allergies}` : "- Allergies : aucune",
-    a.recentEvents ? `- Événements récents : ${a.recentEvents}` : "",
-    ``,
-    `CONFIRMATION FINALE : Cet animal pèse ${weight}kg. Base tous tes calculs (calories journalières, quantités par repas, dosage des compléments) sur ce poids de ${weight}kg.`,
-    ``,
-    `RAPPEL FINAL : Tu génères un plan pour un ${species} de ${weight}kg. Vérifie que chaque conseil mentionne le bon poids et le bon type d'animal.`,
-  ];
+  return `
+PROFIL COMPLET DE L'ANIMAL - UTILISE CES DONNÉES EXACTES DANS TOUT LE PLAN :
 
-  return lines.filter((l) => l !== "").join("\n");
+Nom : ${a.name || "non précisé"}
+Espèce : ${species} (GÉNÈRE UN PLAN UNIQUEMENT POUR UN ${species.toUpperCase()})
+Race : ${a.breed || "non précisée"}
+Taille : ${a.size || "non précisée"}
+Âge : ${a.age}
+Poids EXACT : ${a.weight} kg (UTILISE CE POIDS PRÉCIS DANS TOUTES TES RECOMMANDATIONS, JAMAIS UN AUTRE)
+Sexe : ${sex}, ${sterilized}
+Niveau d'activité : ${activity}
+Objectif : ${goal}
+Alimentation actuelle : ${a.currentDiet || "non précisée"}
+Budget mensuel : ${a.budget ? String(a.budget) + "€" : "non précisé"}
+Mode de vie : ${lifestyle}
+Pathologies : ${a.conditions || "aucune"}
+Allergies alimentaires : ${a.allergies || "aucune"}
+Événements récents : ${a.recentEvents || "aucun"}
+
+INSTRUCTIONS OBLIGATOIRES :
+- Ce plan est UNIQUEMENT pour un ${species} de ${a.weight} kg
+- Chaque conseil, quantité, dosage doit être calculé pour ${a.weight} kg
+- Si l'animal est ${sterilized}, réduis les calories de 10-15%
+- Tiens compte des pathologies : ${a.conditions || "aucune"}
+- Tiens compte des allergies : ${a.allergies || "aucune"}
+- Respecte le budget de ${a.budget || "non précisé"}€/mois
+- Les marques citées doivent être disponibles en France
+- RAPPEL FINAL : poids = ${a.weight} kg, espèce = ${species}, objectif = ${goal}
+`.trim();
 }
 
 function sanitizePlan(plan: NutritionPlan, animalData: Record<string, unknown>): NutritionPlan {
