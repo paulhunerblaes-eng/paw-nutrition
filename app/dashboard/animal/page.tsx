@@ -114,6 +114,7 @@ export default function AnimalPage() {
   const [loaded, setLoaded] = useState(false);
   const [photo, setPhoto] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const savedDataRef = useRef<QuestionnaireData>(defaultQuestionnaireData);
 
   useEffect(() => {
     async function load() {
@@ -122,6 +123,7 @@ export default function AnimalPage() {
         const animal = await getAnimal(user.id);
         if (animal) {
           setData(animal);
+          savedDataRef.current = animal;
           setLoaded(true);
           setPhoto(localStorage.getItem("petnutri_photo"));
           return;
@@ -132,7 +134,11 @@ export default function AnimalPage() {
         localStorage.getItem("petnutri_data") ??
         sessionStorage.getItem("petnutri_data");
       if (raw) {
-        try { setData(JSON.parse(raw) as QuestionnaireData); } catch { /* ignore */ }
+        try {
+          const parsed = JSON.parse(raw) as QuestionnaireData;
+          setData(parsed);
+          savedDataRef.current = parsed;
+        } catch { /* ignore */ }
       }
       setPhoto(localStorage.getItem("petnutri_photo"));
       setLoaded(true);
@@ -177,14 +183,39 @@ export default function AnimalPage() {
     if (user) {
       await upsertAnimal(data, user.id);
       setSavingPhase(2);
-      try {
-        const res = await fetch("/api/generate-plan", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-        if (res.ok) setPlanRegenerated(true);
-      } catch { /* ignore — plan stays as-is */ }
+
+      // Skip regeneration only if the sole change is the animal's name
+      const prev = savedDataRef.current;
+      const onlyNameChanged =
+        data.name !== prev.name &&
+        data.animalType === prev.animalType &&
+        data.breed === prev.breed &&
+        data.size === prev.size &&
+        data.age === prev.age &&
+        data.weight === prev.weight &&
+        data.sex === prev.sex &&
+        data.sterilized === prev.sterilized &&
+        data.activityLevel === prev.activityLevel &&
+        data.goal === prev.goal &&
+        data.currentDiet === prev.currentDiet &&
+        data.budget === prev.budget &&
+        data.lifestyle === prev.lifestyle &&
+        data.conditions === prev.conditions &&
+        data.allergies === prev.allergies &&
+        data.recentEvents === prev.recentEvents;
+
+      if (!onlyNameChanged) {
+        try {
+          const res = await fetch("/api/generate-plan", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          if (res.ok) setPlanRegenerated(true);
+        } catch { /* ignore — plan stays as-is */ }
+      }
+
+      savedDataRef.current = data;
     }
     const json = JSON.stringify(data);
     localStorage.setItem("petnutri_data", json);
