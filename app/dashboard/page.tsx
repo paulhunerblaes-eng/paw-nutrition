@@ -35,99 +35,108 @@ const GOAL_LABELS: Record<string, string> = {
 
 type Tip = { title: string; body: string };
 
-function getTips(goal: string | null, activity: string | null): Tip[] {
+function getTips(goal: string | null, activity: string | null, animalType: string | null): Tip[] {
+  const isdog = animalType !== "cat";
+  const animal = isdog ? "votre chien" : "votre chat";
+  const Animal = isdog ? "Votre chien" : "Votre chat";
+
   const base: Record<string, Tip[]> = {
     maintain: [
       {
         title: "Stabilité des portions",
-        body: "Pour maintenir le poids idéal, la précision des quantités est essentielle. Pesez les portions une fois par semaine et utilisez toujours le même bol doseur. Une variation de ±5% dans les apports journaliers est normale — au-delà, ajustez progressivement.",
+        body: `Pour maintenir le poids idéal, la précision des quantités est essentielle. Pesez les portions une fois par semaine et utilisez toujours le même bol doseur. Une légère variation dans les apports journaliers est normale — au-delà, ajustez progressivement.`,
       },
       {
         title: "Qualité des protéines avant tout",
-        body: "Les protéines sont le pilier d'un poids stable. Privilégiez des sources animales de haute qualité comme le poulet, le saumon ou l'agneau. Elles soutiennent la masse musculaire et favorisent la satiété, réduisant les comportements de quête alimentaire entre les repas.",
+        body: `Les protéines sont le pilier d'un poids stable. Privilégiez des sources animales de haute qualité comme le poulet, le saumon ou l'agneau. Elles soutiennent la masse musculaire et favorisent la satiété, réduisant les comportements de quête alimentaire entre les repas.`,
       },
       {
         title: "Hydratation quotidienne",
-        body: "Un chien adulte de 30 kg nécessite 300–500 ml d'eau fraîche par jour. Vérifiez et remplissez le bol matin et soir. En été ou après l'effort, ce besoin peut augmenter de 30%. La déshydratation chronique affecte les reins, l'énergie et la digestion.",
+        body: `Vérifiez et remplissez le bol d'eau matin et soir. En été ou après l'effort, les besoins en eau augmentent significativement. La déshydratation chronique affecte les reins, l'énergie et la digestion de ${animal}.`,
       },
       {
         title: "Régularité des horaires",
-        body: "Des repas servis aux mêmes heures chaque jour régulent le métabolisme et améliorent la digestion. Évitez les repas trop tardifs (après 20h) car le métabolisme ralentit le soir. Deux prises par jour, espacées de 10–12h, constituent le rythme optimal.",
+        body: `Des repas servis aux mêmes heures chaque jour régulent le métabolisme et améliorent la digestion. Évitez les repas trop tardifs car le métabolisme ralentit le soir. Deux prises par jour, espacées de 10–12h, constituent le rythme optimal.`,
       },
       {
         title: "Surveillance mensuelle du poids",
-        body: "Pesez votre animal le même jour chaque mois et notez l'évolution dans le tableau de bord. Une prise ou perte supérieure à 2% du poids corporel en un mois justifie un ajustement des portions ou une consultation vétérinaire.",
+        body: `Pesez ${animal} le même jour chaque mois et notez l'évolution. Une variation importante en un mois justifie un ajustement des portions ou une consultation vétérinaire.`,
       },
     ],
     lose: [
       {
         title: "Réduction progressive et sécurisée",
-        body: "Ne réduisez jamais les portions de plus de 10% à la fois. Une perte de poids saine ne dépasse pas 1–2% du poids corporel par semaine. Au-delà, des carences nutritionnelles peuvent apparaître et fragiliser l'organisme, notamment les muscles et le système immunitaire.",
+        body: `Ne réduisez jamais les portions brutalement. Une perte de poids saine est lente et progressive. Au-delà d'une certaine vitesse, des carences nutritionnelles peuvent apparaître et fragiliser l'organisme, notamment les muscles et le système immunitaire de ${animal}.`,
       },
       {
         title: "Fibres et sensation de satiété",
-        body: "Ajoutez des légumes faibles en calories comme des haricots verts cuits ou des carottes râpées (max 10% de la ration totale). Les fibres ralentissent la digestion, prolongent la satiété et aident votre animal à ne pas réclamer entre les repas sans ajouter de calories significatives.",
+        body: `Ajoutez des légumes faibles en calories comme des haricots verts cuits ou des carottes râpées (max 10% de la ration totale). Les fibres ralentissent la digestion, prolongent la satiété et aident ${animal} à ne pas réclamer entre les repas sans ajouter de calories significatives.`,
       },
       {
         title: "Supprimer les calories cachées",
-        body: "Les friandises représentent souvent 15–25% des apports journaliers sans que les propriétaires s'en rendent compte. Passez à des récompenses légères (petits morceaux de carotte, dés de poulet cuit sans assaisonnement) et réduisez les friandises à 5% maximum de la ration.",
+        body: `Les friandises représentent souvent une part importante des apports journaliers sans que les propriétaires s'en rendent compte. Passez à des récompenses légères (petits morceaux de carotte, dés de poulet cuit sans assaisonnement) et limitez les friandises au strict minimum.`,
       },
       {
-        title: "Exercice progressif et régulier",
-        body: "Augmentez les sorties de 10–15 minutes par semaine jusqu'à atteindre 45–60 minutes d'activité modérée quotidienne. L'exercice préserve la masse musculaire pendant la perte de poids, ce qui est crucial pour éviter l'effet yoyo une fois le régime terminé.",
+        title: isdog ? "Sorties et exercice progressif" : "Jeux et activité progressive",
+        body: isdog
+          ? `Augmentez progressivement la durée des sorties chaque semaine. L'exercice préserve la masse musculaire pendant la perte de poids, ce qui est crucial pour éviter l'effet yoyo une fois le régime terminé.`
+          : `Encouragez les sessions de jeu quotidiennes avec des jouets interactifs. L'activité physique régulière préserve la masse musculaire de votre chat et accélère la perte de masse graisseuse.`,
       },
       {
         title: "Patience et régularité",
-        body: "La perte de poids correcte prend du temps : attendez 4 à 6 semaines avant d'évaluer les résultats. Pesez votre animal toutes les 2 semaines et ajustez les portions de −5% si la progression stagne, ou revenez en arrière si la perte est trop rapide (>2% par semaine).",
+        body: `La perte de poids correcte prend du temps : attendez plusieurs semaines avant d'évaluer les résultats. Pesez ${animal} régulièrement et ajustez les portions si la progression stagne, en consultant votre vétérinaire si nécessaire.`,
       },
     ],
     gain: [
       {
         title: "Augmentation graduelle des portions",
-        body: "Augmentez les rations de 10% toutes les 2 semaines jusqu'à atteindre le poids cible. Une prise trop rapide favorise la graisse au détriment du muscle. L'idéal est une progression de 1–1,5% du poids corporel par semaine sur plusieurs semaines.",
+        body: `Augmentez les rations progressivement sur plusieurs semaines jusqu'à atteindre le poids cible. Une prise trop rapide favorise la graisse au détriment du muscle. Privilégiez une progression régulière et contrôlée.`,
       },
       {
         title: "Protéines pour la masse musculaire",
-        body: "Visez un apport minimum de 30–35% de protéines de qualité dans la ration quotidienne. Les sources animales (viande, poisson) sont les plus assimilables. Évitez les protéines végétales en trop grande proportion car leur biodisponibilité est inférieure pour les carnivores.",
+        body: `Visez un apport élevé en protéines de qualité dans la ration quotidienne. Les sources animales (viande, poisson) sont les plus assimilables pour ${animal}. Évitez les protéines végétales en trop grande proportion car leur biodisponibilité est inférieure pour les carnivores.`,
       },
       {
         title: "Fractionner en 3 repas par jour",
-        body: "Passez temporairement à 3 repas par jour au lieu de 2. Cela augmente l'apport calorique total sans surcharger le système digestif à chaque repas. Les chiens et chats tolèrent généralement très bien 3 prises journalières pendant la phase de prise de poids.",
+        body: `Passez temporairement à 3 repas par jour au lieu de 2. Cela augmente l'apport calorique total sans surcharger le système digestif de ${animal} à chaque repas.`,
       },
       {
         title: "Compléments pour soutenir la prise de poids",
-        body: "Les compléments en oméga-3 (huile de saumon, 1 cuillère à soupe par jour pour un grand chien) apportent des lipides de qualité et soutiennent l'absorption des vitamines liposolubles A, D, E et K. La vitamine B12 peut également favoriser l'appétit.",
+        body: `Les compléments en oméga-3 (huile de saumon) apportent des lipides de qualité et soutiennent l'absorption des vitamines liposolubles A, D, E et K. ${Animal} peut également bénéficier d'un complexe vitaminé B pour stimuler l'appétit.`,
       },
       {
-        title: "Monitoring bimensuel",
-        body: "Pesez votre animal toutes les 2 semaines et ajustez si la prise dépasse 2% du poids par semaine (risque de surcharge graisseuse). Consultez votre vétérinaire si malgré une augmentation des portions votre animal ne prend pas de poids après 3 semaines consécutives.",
+        title: "Suivi régulier du poids",
+        body: `Pesez ${animal} toutes les 2 semaines et ajustez si la prise est trop rapide (risque de surcharge graisseuse). Consultez votre vétérinaire si, malgré une augmentation des portions, le poids ne progresse pas après 3 semaines consécutives.`,
       },
     ],
   };
 
   const activityTip: Record<string, Tip> = {
     low: {
-      title: "Stimulation mentale pour un animal peu actif",
-      body: "Un animal peu actif physiquement a besoin de stimulation mentale pour éviter l'ennui et les comportements compulsifs. Les jeux de recherche alimentaire, les Kong remplis d'une part de sa ration ou les puzzles alimentaires sont excellents — ils ralentissent l'ingestion et stimulent le cerveau sans ajouter de calories.",
+      title: isdog ? "Stimulation mentale pour un chien peu actif" : "Enrichissement pour un chat peu actif",
+      body: isdog
+        ? `Un chien peu actif physiquement a besoin de stimulation mentale pour éviter l'ennui et les comportements compulsifs. Les jeux de recherche alimentaire, les Kong remplis ou les puzzles alimentaires sont excellents — ils ralentissent l'ingestion et stimulent le cerveau sans ajouter de calories.`
+        : `Un chat peu actif a besoin de stimulation mentale et physique. Les jouets de chasse, les puzzles alimentaires et les séances de jeu interactif quotidiennes sont idéaux pour stimuler son instinct naturel tout en brûlant des calories.`,
     },
     moderate: {
-      title: "Constance des sorties",
-      body: "Un niveau d'activité modéré idéal se traduit par 30–45 minutes de marche quotidienne. Essayez de maintenir ce rythme même les week-ends pour éviter les pics et creux d'activité qui déstabilisent le métabolisme et peuvent provoquer des troubles digestifs le lundi.",
+      title: "Constance de l'activité",
+      body: `Essayez de maintenir un rythme d'activité régulier même les week-ends pour éviter les pics et creux qui déstabilisent le métabolisme de ${animal} et peuvent provoquer des troubles digestifs.`,
     },
     high: {
       title: "Récupération post-effort",
-      body: "Après une activité intense, attendez 30 minutes avant de servir le repas pour éviter les problèmes gastriques (notamment le retournement de l'estomac, fréquent chez les grandes races comme les Labradors et Bergers). Proposez de l'eau fraîche immédiatement après l'effort, mais en petite quantité.",
+      body: isdog
+        ? `Après une activité intense, attendez au moins 30 minutes avant de servir le repas pour éviter les problèmes gastriques. Proposez de l'eau fraîche immédiatement après l'effort, mais en petite quantité d'abord.`
+        : `Après une session de jeu intense, laissez votre chat se calmer avant de servir son repas. Proposez de l'eau fraîche en accès libre pour compenser la perte hydrique due à l'activité.`,
     },
     very_high: {
-      title: "Alimentation sportive adaptée",
-      body: "Pour un animal très actif (sport, travail, chasse), les besoins caloriques peuvent être 50–80% supérieurs à un animal sédentaire. Distribuez le supplément énergétique avant l'effort sous forme de repas léger riche en glucides complexes, et le repas principal 1h après la récupération.",
+      title: "Alimentation pour animal très actif",
+      body: `Pour ${animal} très actif, les besoins caloriques peuvent être significativement supérieurs à un animal sédentaire. Distribuez un repas léger avant l'effort et le repas principal après la récupération.`,
     },
   };
 
   const tips = base[goal ?? "maintain"] ?? base.maintain;
   const extra = activityTip[activity ?? "moderate"];
 
-  // Replace last generic tip with activity-specific one if available
   if (extra) {
     return [...tips.slice(0, 4), extra];
   }
@@ -209,13 +218,13 @@ export default function DashboardPage() {
   const displayName = pet?.name || pet?.breed || "votre animal";
 
   const profileRows = [
-    { label: "Poids actuel", value: pet?.weight ? `${pet.weight} kg` : "30 kg" },
+    { label: "Poids actuel", value: pet?.weight ? `${pet.weight} kg` : "—" },
     { label: "Activité", value: pet?.activityLevel ? (ACTIVITY_LABELS[pet.activityLevel] ?? "—") : "Élevé" },
     { label: "Objectif", value: pet?.goal ? (GOAL_LABELS[pet.goal] ?? "—") : "Maintenir le poids" },
     { label: "Budget mensuel", value: pet?.budget ? `${pet.budget} €` : "—" },
   ];
 
-  const tips = getTips(pet?.goal ?? null, pet?.activityLevel ?? null);
+  const tips = getTips(pet?.goal ?? null, pet?.activityLevel ?? null, pet?.animalType ?? null);
   const hasConditions = !!(pet?.conditions?.trim());
 
   return (
