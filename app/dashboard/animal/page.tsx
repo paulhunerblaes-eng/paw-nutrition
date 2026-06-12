@@ -105,6 +105,13 @@ function ToggleButton({
 const inputClass =
   "w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition-colors focus:border-petblue focus:ring-2 focus:ring-petblue/20 min-h-[44px]";
 
+const MONTHS_FR = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+
+function nextMonthLabel(resetDateStr: string): string {
+  const d = new Date(resetDateStr + "T00:00:00");
+  return `1er ${MONTHS_FR[d.getMonth()]} ${d.getFullYear()}`;
+}
+
 export default function AnimalPage() {
   const [data, setData] = useState<QuestionnaireData>(defaultQuestionnaireData);
   const [saving, setSaving] = useState(false);
@@ -113,6 +120,7 @@ export default function AnimalPage() {
   const [planRegenerated, setPlanRegenerated] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [photo, setPhoto] = useState<string | null>(null);
+  const [limitModal, setLimitModal] = useState<{ resetDate: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -171,6 +179,19 @@ export default function AnimalPage() {
   const handleSave = async () => {
     console.log("handleSave appelé");
     if (weightInvalid) return;
+
+    // Check regeneration limit before doing anything
+    try {
+      const checkRes = await fetch("/api/check-regenerations");
+      if (checkRes.ok) {
+        const { remaining, resetDate } = await checkRes.json() as { remaining: number; resetDate: string };
+        if (remaining === 0) {
+          setLimitModal({ resetDate });
+          return;
+        }
+      }
+    } catch { /* ignore — proceed if check fails */ }
+
     setSaving(true);
     setSavingPhase(1);
     setPlanRegenerated(false);
@@ -206,6 +227,27 @@ export default function AnimalPage() {
   return (
     <div>
       {saving && <SavingOverlay phase={savingPhase} />}
+
+      {limitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <h2 className="mb-2 text-lg font-bold text-slate-900">Limite mensuelle atteinte</h2>
+            <p className="text-sm leading-relaxed text-slate-600">
+              Vous avez utilisé vos 4 mises à jour de ce mois.{" "}
+              Revenez le{" "}
+              <span className="font-semibold text-slate-900">{nextMonthLabel(limitModal.resetDate)}</span>{" "}
+              pour régénérer votre plan.
+            </p>
+            <button
+              type="button"
+              onClick={() => setLimitModal(null)}
+              className="mt-5 w-full rounded-xl bg-petblue py-3 font-semibold text-slate-900 transition-all hover:bg-petblue/80"
+            >
+              Compris
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">Mon animal</h1>
