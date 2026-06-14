@@ -155,7 +155,7 @@ export default function ParametresPage() {
                 <CheckCircleIcon className="h-5 w-5 flex-shrink-0 text-petblue" />
                 <div>
                   <p className="font-semibold text-slate-900">
-                    Plan PetNutri — 9,99 €/mois
+                    Plan PetNutri — 6,99 €/mois
                   </p>
                   <p className="text-xs text-slate-500">Abonnement actif · Résiliable à tout moment</p>
                 </div>

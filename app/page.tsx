@@ -300,7 +300,7 @@ export default function LandingPage() {
 
           <div className="mt-10 rounded-3xl border-2 border-petblue bg-white p-8 shadow-xl shadow-petblue/20">
             <div className="text-center">
-              <div className="text-5xl font-extrabold text-slate-900">9,99€</div>
+              <div className="text-5xl font-extrabold text-slate-900">6,99€</div>
               <div className="mt-1 text-sm text-slate-400">par mois</div>
             </div>
 

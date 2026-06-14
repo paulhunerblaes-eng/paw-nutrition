@@ -487,7 +487,7 @@ export default function PlanPage() {
                       Redirection…
                     </>
                   ) : (
-                    "Débloquer pour 9,99 € →"
+                    "Débloquer pour 6,99 € →"
                   )}
                 </button>
                 <p className="mt-2 text-xs text-slate-600">

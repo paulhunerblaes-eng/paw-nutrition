@@ -35,7 +35,7 @@ export default function CGUPage() {
               l&apos;utilisateur (espèce, race, âge, poids, niveau d&apos;activité, objectifs santé).
             </p>
             <p className="mt-3">
-              L&apos;accès au Service est soumis à un abonnement mensuel de <strong>9,99 €/mois</strong>,
+              L&apos;accès au Service est soumis à un abonnement mensuel de <strong>6,99 €/mois</strong>,
               résiliable à tout moment sans frais ni préavis, avec effet à la fin de la période en cours.
             </p>
             <p className="mt-3">

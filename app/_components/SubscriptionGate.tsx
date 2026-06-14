@@ -125,7 +125,7 @@ export function SubscriptionGate({ children }: { children: React.ReactNode }) {
           <div className="px-8 py-6">
             {/* Price */}
             <div className="mb-5 flex items-baseline justify-center gap-1">
-              <span className="text-5xl font-extrabold text-slate-900">9,99</span>
+              <span className="text-5xl font-extrabold text-slate-900">6,99</span>
               <span className="text-xl font-semibold text-slate-600">€</span>
               <span className="ml-1 text-sm text-slate-400">/mois</span>
             </div>
