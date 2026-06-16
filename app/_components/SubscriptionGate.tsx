@@ -24,11 +24,9 @@ export function SubscriptionGate({ children }: { children: React.ReactNode }) {
       const { createClient } = await import("../_lib/supabase");
       const supabase = createClient();
 
-      // Stripe success redirect — update Supabase then unlock
+      // Stripe success redirect — update Supabase BEFORE redirecting so the
+      // new SubscriptionGate on /dashboard/plan sees is_subscribed = true.
       if (window.location.search.includes("success=true")) {
-        setSubscribed(true);
-        setChecked(true);
-        router.replace("/dashboard/plan");
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
@@ -39,6 +37,9 @@ export function SubscriptionGate({ children }: { children: React.ReactNode }) {
             localStorage.setItem("petnutri_subscribed", "true");
           }
         } catch { /* best-effort */ }
+        setSubscribed(true);
+        setChecked(true);
+        router.replace("/dashboard/plan");
         return;
       }
 
