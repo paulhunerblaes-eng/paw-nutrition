@@ -23,6 +23,19 @@ QUALITÉ DES RECOMMANDATIONS :
 - Les conseils doivent être actionnables et concrets, pas génériques
 - Pour les compléments, indique le dosage précis selon le poids de l'animal
 
+CALCUL OBLIGATOIRE DES CALORIES ET PORTIONS :
+Tu DOIS recalculer entièrement calories_journalieres et les quantités de chaque repas en fonction des données ACTUELLES fournies. Ne jamais réutiliser une valeur précédente.
+Formule de base : Poids (kg) × facteur activité × 30 = calories de base
+  - Niveau faible     → facteur 1.2
+  - Niveau modéré     → facteur 1.4
+  - Niveau élevé      → facteur 1.6
+  - Niveau très élevé → facteur 1.8
+Ajustements obligatoires (à appliquer dans cet ordre) :
+  - Si objectif = perdre du poids  → réduire de 15 à 20%
+  - Si objectif = prendre du poids → augmenter de 15 à 20%
+  - Si animal stérilisé            → réduire de 10% supplémentaires
+Les quantités (champ "quantite") de chaque repas doivent être calculées pour atteindre exactement le total calorique journalier ainsi obtenu. Aucune valeur approchée : recalcule à chaque fois.
+
 Réponds UNIQUEMENT avec un objet JSON valide, sans markdown, sans backticks, sans texte d'introduction. Le JSON doit commencer par { et finir par }.
 
 Le JSON doit respecter exactement ce schéma :
@@ -90,6 +103,7 @@ INSTRUCTIONS OBLIGATOIRES :
 - Respecte le budget de ${a.budget || "non précisé"}€/mois
 - Les marques citées doivent être disponibles en France
 - RAPPEL FINAL : poids = ${a.weight} kg, espèce = ${species}, objectif = ${goal}
+- RECALCULE entièrement calories_journalieres et quantites des repas depuis ces données — aucune valeur précédente ne doit subsister
 `.trim();
 }
 
