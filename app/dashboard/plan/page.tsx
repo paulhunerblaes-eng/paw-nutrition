@@ -63,15 +63,25 @@ export default function DashboardPlanPage() {
 
   useEffect(() => {
     async function load() {
+      // getUser() makes a network request; if it transiently returns null
+      // (e.g. right after router.replace), fall back to getSession() which
+      // reads from cookies synchronously before giving up.
+      let userId: string | null = null;
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setLoading(false); return; }
+      if (user) {
+        userId = user.id;
+      } else {
+        const { data: { session } } = await supabase.auth.getSession();
+        userId = session?.user?.id ?? null;
+      }
+      if (!userId) { setLoading(false); return; }
 
       // Load animal profile
-      const animal = await getAnimal(user.id);
+      const animal = await getAnimal(userId);
       if (animal) setPet(animal);
 
       // Load existing plan from DB
-      const existingPlan = await getPlan(user.id);
+      const existingPlan = await getPlan(userId);
       console.log("[plan page] getPlan résultat:", existingPlan ? "plan trouvé" : "null");
       if (existingPlan) {
         setPlan(existingPlan);

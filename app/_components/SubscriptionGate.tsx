@@ -21,8 +21,7 @@ export function SubscriptionGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function check() {
-      const { createClient } = await import("../_lib/supabase");
-      const supabase = createClient();
+      const { supabase } = await import("../_lib/supabase");
 
       // Stripe success redirect — update Supabase BEFORE redirecting so the
       // new SubscriptionGate on /dashboard/plan sees is_subscribed = true.
